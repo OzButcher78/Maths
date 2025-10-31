@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Esercizi di Matematica",
+  "gameTitle": "Maestro di Matematica",
   "chooseDifficulty": "Scegli Difficoltà",
   "easy": "Facile",
   "medium": "Medio",
@@ -48,7 +48,7 @@
   "about": "Informazioni",
   "privacy": "Privacy",
   "rulesTitle": "Regole del Gioco",
-  "aboutTitle": "Informazioni su Esercizi di Matematica",
+  "aboutTitle": "Informazioni su Maestro di Matematica",
   "privacyTitle": "Informativa sulla Privacy",
   "regularModeTitle": "Modalità Normale 🏆",
   "regularModeDesc": "Rispondi alle domande per ottenere punti. Hai 3 vite. Il gioco termina quando finisci le vite.",
@@ -67,5 +67,8 @@
   "splashStreak3": "Maestro di Matematica!",
   "splashProgress1": "Fantastico! {count} domande risolte!",
   "splashProgress2": "Continua così!",
-  "splashProgress3": "Sei un genio!"
+  "splashProgress3": "Sei un genio!",
+  "gameSummary": "Riepilogo Partita",
+  "questionsAnswered": "Risposte",
+  "correctAnswers": "Corrette"
 }

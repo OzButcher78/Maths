@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Prática de Matemática",
+  "gameTitle": "Mestre da Matemática",
   "chooseDifficulty": "Escolha a Dificuldade",
   "easy": "Fácil",
   "medium": "Médio",
@@ -48,7 +48,7 @@
   "about": "Sobre",
   "privacy": "Privacidade",
   "rulesTitle": "Regras do Jogo",
-  "aboutTitle": "Sobre o Prática de Matemática",
+  "aboutTitle": "Sobre o Mestre da Matemática",
   "privacyTitle": "Política de Privacidade",
   "regularModeTitle": "Modo Regular 🏆",
   "regularModeDesc": "Responda às perguntas para marcar pontos. Você tem 3 vidas. O jogo termina quando você fica sem vidas.",
@@ -67,5 +67,8 @@
   "splashStreak3": "Mestre da matemática!",
   "splashProgress1": "Incrível! {count} perguntas resolvidas!",
   "splashProgress2": "Continue assim!",
-  "splashProgress3": "Você é um gênio!"
+  "splashProgress3": "Você é um gênio!",
+  "gameSummary": "Resumo do Jogo",
+  "questionsAnswered": "Respondidas",
+  "correctAnswers": "Corretas"
 }

@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Práctica de Matemáticas",
+  "gameTitle": "Maestro de Mates",
   "chooseDifficulty": "Elige Dificultad",
   "easy": "Fácil",
   "medium": "Medio",
@@ -48,7 +48,7 @@
   "about": "Acerca de",
   "privacy": "Privacidad",
   "rulesTitle": "Reglas del Juego",
-  "aboutTitle": "Acerca de Maths Practice",
+  "aboutTitle": "Acerca de Maestro de Mates",
   "privacyTitle": "Política de Privacidad",
   "regularModeTitle": "Modo Normal 🏆",
   "regularModeDesc": "Responde preguntas para ganar puntos. Tienes 3 vidas. El juego termina cuando te quedas sin vidas.",
@@ -67,5 +67,8 @@
   "splashStreak3": "¡Maestro de las mates!",
   "splashProgress1": "¡Genial! ¡{count} preguntas resueltas!",
   "splashProgress2": "¡Sigue así!",
-  "splashProgress3": "¡Eres un genio!"
+  "splashProgress3": "¡Eres un genio!",
+  "gameSummary": "Resumen del Juego",
+  "questionsAnswered": "Respondidas",
+  "correctAnswers": "Correctas"
 }

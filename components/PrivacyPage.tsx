@@ -10,7 +10,7 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col items-center gap-6 text-center animate-fade-in max-w-lg mx-auto">
-      <h2 className="text-4xl font-black text-yellow-300">{t('privacyTitle')}</h2>
+      <h2 className="text-3xl md:text-4xl font-black text-yellow-300">{t('privacyTitle')}</h2>
       
       <div className="w-full bg-black/20 p-6 rounded-xl space-y-4 text-left">
         <p className="text-white/90">{t('privacyPolicyText')}</p>

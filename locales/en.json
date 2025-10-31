@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Maths Practice",
+  "gameTitle": "Math Master",
   "chooseDifficulty": "Choose Difficulty",
   "easy": "Easy",
   "medium": "Medium",
@@ -48,7 +48,7 @@
   "about": "About",
   "privacy": "Privacy",
   "rulesTitle": "Game Rules",
-  "aboutTitle": "About Maths Practice",
+  "aboutTitle": "About Math Master",
   "privacyTitle": "Privacy Policy",
   "regularModeTitle": "Regular Mode 🏆",
   "regularModeDesc": "Answer questions to score points. You have 3 lives. The game ends when you run out of lives.",
@@ -67,5 +67,8 @@
   "splashStreak3": "Math Master!",
   "splashProgress1": "Awesome! {count} questions solved!",
   "splashProgress2": "Keep it up!",
-  "splashProgress3": "You're a genius!"
+  "splashProgress3": "You're a genius!",
+  "gameSummary": "Game Summary",
+  "questionsAnswered": "Answered",
+  "correctAnswers": "Correct"
 }

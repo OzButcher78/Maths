@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Pratique des Maths",
+  "gameTitle": "Maître des Maths",
   "chooseDifficulty": "Choisissez la Difficulté",
   "easy": "Facile",
   "medium": "Moyen",
@@ -48,7 +48,7 @@
   "about": "À propos",
   "privacy": "Confidentialité",
   "rulesTitle": "Règles du jeu",
-  "aboutTitle": "À propos de Pratique des Maths",
+  "aboutTitle": "À propos de Maître des Maths",
   "privacyTitle": "Politique de confidentialité",
   "regularModeTitle": "Mode Normal 🏆",
   "regularModeDesc": "Répondez aux questions pour marquer des points. Vous avez 3 vies. Le jeu se termine lorsque vous n'avez plus de vies.",
@@ -67,5 +67,8 @@
   "splashStreak3": "Maître des maths !",
   "splashProgress1": "Génial ! {count} questions résolues !",
   "splashProgress2": "Continuez comme ça !",
-  "splashProgress3": "Vous êtes un génie !"
+  "splashProgress3": "Vous êtes un génie !",
+  "gameSummary": "Résumé du jeu",
+  "questionsAnswered": "Répondues",
+  "correctAnswers": "Correctes"
 }

@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "تمارين الرياضيات",
+  "gameTitle": "سيد الرياضيات",
   "chooseDifficulty": "اختر الصعوبة",
   "easy": "سهل",
   "medium": "متوسط",
@@ -48,7 +48,7 @@
   "about": "حول",
   "privacy": "الخصوصية",
   "rulesTitle": "قواعد اللعبة",
-  "aboutTitle": "حول تمارين الرياضيات",
+  "aboutTitle": "حول سيد الرياضيات",
   "privacyTitle": "سياسة الخصوصية",
   "regularModeTitle": "الوضع العادي 🏆",
   "regularModeDesc": "أجب على الأسئلة لتسجيل النقاط. لديك 3 حيوات. تنتهي اللعبة عندما تنفد حيواتك.",
@@ -67,5 +67,8 @@
   "splashStreak3": "أستاذ الرياضيات!",
   "splashProgress1": "رائع! تم حل {count} سؤال!",
   "splashProgress2": "استمر!",
-  "splashProgress3": "أنت عبقري!"
+  "splashProgress3": "أنت عبقري!",
+  "gameSummary": "ملخص اللعبة",
+  "questionsAnswered": "أجبت",
+  "correctAnswers": "صحيحة"
 }

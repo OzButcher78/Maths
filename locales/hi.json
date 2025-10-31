@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "गणित अभ्यास",
+  "gameTitle": "गणित मास्टर",
   "chooseDifficulty": "कठिनाई चुनें",
   "easy": "आसान",
   "medium": "मध्यम",
@@ -48,7 +48,7 @@
   "about": "विवरण",
   "privacy": "गोपनीयता",
   "rulesTitle": "खेल के नियम",
-  "aboutTitle": "गणित अभ्यास के बारे में",
+  "aboutTitle": "गणित मास्टर के बारे में",
   "privacyTitle": "गोपनीयता नीति",
   "regularModeTitle": "नियमित मोड 🏆",
   "regularModeDesc": "अंक अर्जित करने के लिए प्रश्नों का उत्तर दें। आपके पास 3 जीवन हैं। जब आपके जीवन समाप्त हो जाते हैं तो खेल समाप्त हो जाता है।",
@@ -67,5 +67,8 @@
   "splashStreak3": "गणित के मास्टर!",
   "splashProgress1": "बहुत बढ़िया! {count} प्रश्न हल किए!",
   "splashProgress2": "लगे रहो!",
-  "splashProgress3": "आप एक प्रतिभाशाली हैं!"
+  "splashProgress3": "आप एक प्रतिभाशाली हैं!",
+  "gameSummary": "खेल सारांश",
+  "questionsAnswered": "उत्तर दिए",
+  "correctAnswers": "सही उत्तर"
 }

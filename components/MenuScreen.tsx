@@ -21,7 +21,8 @@ const operationSymbols = {
     random: '?',
 };
 
-const gameModeIcons: Partial<Record<GameMode, string>> = {
+const gameModeIcons: Record<GameMode, string> = {
+    regular: '🏆',
     timeAttack: '⏱️',
     beatTheClock: '⏳',
 };
@@ -81,24 +82,24 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
     <div className="flex flex-col items-center gap-6 animate-fade-in">
       
       <div className="w-full">
-        <h2 className="text-2xl font-bold text-center mb-4">{t('chooseGameMode')}</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-4">{t('chooseGameMode')}</h2>
+        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3">
           {gameModes.map(m => (
             <button
               key={m}
               onClick={() => { playButtonSound(); setSelectedGameMode(m); }}
-              className={`flex items-center justify-center w-full py-3 px-2 text-base font-bold rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-50
+              className={`flex flex-row items-center justify-center w-full py-2 sm:py-3 px-2 text-sm sm:text-base font-bold rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-50 text-center
               ${selectedGameMode === m ? 'bg-yellow-400 text-indigo-800 scale-105 ring-yellow-300' : 'bg-white/30 text-white hover:bg-white/50'}`}
             >
-              {gameModeIcons[m] && <span className="mr-1 text-lg">{gameModeIcons[m]}</span>}
-              {gameModeDisplay[m]}
+              <span className="text-lg mr-2">{gameModeIcons[m]}</span>
+              <span>{gameModeDisplay[m]}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div className="w-full">
-        <h2 className="text-2xl font-bold text-center mb-4">{t('chooseDifficulty')}</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-4">{t('chooseDifficulty')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {difficulties.map(d => (
             <button
@@ -114,7 +115,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
       </div>
       
       <div>
-        <h2 className="text-2xl font-bold text-center mb-4">{t('chooseOperation')}</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-4">{t('chooseOperation')}</h2>
         <div className="grid grid-cols-5 gap-3">
           {operations.map(o => (
             <button

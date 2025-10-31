@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScoreEntry, Difficulty } from '../types';
+import { ScoreEntry, Difficulty, GameMode, PerformanceStats, Operation } from '../types';
 import Leaderboard from './Leaderboard';
 import { useLocalization } from '../context/LocalizationContext';
 
@@ -10,9 +10,11 @@ interface GameOverScreenProps {
   onPlayAgain: () => void;
   onShowStats: () => void;
   difficulty: Difficulty | null;
+  gameMode: GameMode | null;
+  stats: PerformanceStats;
 }
 
-const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onAddToLeaderboard, onPlayAgain, onShowStats, difficulty }) => {
+const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onAddToLeaderboard, onPlayAgain, onShowStats, difficulty, gameMode, stats }) => {
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -36,14 +38,44 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
     }
   };
 
+  const allOps: Operation[] = ['addition', 'subtraction', 'multiplication', 'division', 'random'];
+  const totalQuestions = allOps.reduce((sum, op) => sum + (stats[op]?.total || 0), 0);
+  const totalCorrect = allOps.reduce((sum, op) => sum + (stats[op]?.correct || 0), 0);
+  const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+
+
   return (
     <div className="flex flex-col items-center gap-6 text-center animate-fade-in">
-      <h2 className="text-5xl font-black text-yellow-300">{t('gameOver')}</h2>
-      <p className="text-2xl">{t('finalScore')}</p>
-      <p className="text-7xl font-black">{score}</p>
+      <h2 className="text-4xl md:text-5xl font-black text-yellow-300">{t('gameOver')}</h2>
+      <p className="text-xl md:text-2xl">{t('finalScore')}</p>
+      <p className="text-6xl md:text-7xl font-black">{score}</p>
       
+      <div className="w-full max-w-sm bg-black/20 p-3 rounded-xl">
+        <h3 className="text-xl font-bold mb-2">{t('gameSummary')}</h3>
+        <div className="flex justify-around text-center">
+            {gameMode === 'regular' && (
+                <div>
+                    <p className="text-3xl font-bold">{accuracy}%</p>
+                    <p className="text-sm opacity-80">{t('accuracy')}</p>
+                </div>
+            )}
+             {(gameMode === 'timeAttack' || gameMode === 'beatTheClock') && (
+                <>
+                    <div>
+                        <p className="text-3xl font-bold">{totalQuestions}</p>
+                        <p className="text-sm opacity-80">{t('questionsAnswered')}</p>
+                    </div>
+                     <div>
+                        <p className="text-3xl font-bold text-green-400">{totalCorrect}</p>
+                        <p className="text-sm opacity-80">{t('correctAnswers')}</p>
+                    </div>
+                </>
+            )}
+        </div>
+      </div>
+
       {!submitted ? (
-        <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4 items-center mt-4">
+        <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4 items-center mt-2">
           <p className="text-lg">{t('enterNamePrompt')}</p>
           <input
             type="text"
@@ -62,11 +94,11 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
         <p className="text-xl font-bold text-green-300">{t('scoreAdded')}</p>
       )}
 
-      <div className="w-full mt-6">
+      <div className="w-full mt-4">
         <Leaderboard scores={leaderboard} />
       </div>
 
-      <div className="w-full max-w-sm mt-6 flex flex-col gap-3">
+      <div className="w-full max-w-sm mt-4 flex flex-col gap-3">
         <button onClick={onPlayAgain} className="py-3 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105">
           {t('playAgain')}
         </button>

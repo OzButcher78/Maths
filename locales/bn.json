@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "গণিত অনুশীলন",
+  "gameTitle": "গণিত মাস্টার",
   "chooseDifficulty": "কঠিনতা নির্বাচন করুন",
   "easy": "সহজ",
   "medium": "মধ্যম",
@@ -48,7 +48,7 @@
   "about": "সম্পর্কে",
   "privacy": "গোপনীয়তা",
   "rulesTitle": "খেলার নিয়ম",
-  "aboutTitle": "গণিত অনুশীলন সম্পর্কে",
+  "aboutTitle": "গণিত মাস্টার সম্পর্কে",
   "privacyTitle": "গোপনীয়তা নীতি",
   "regularModeTitle": "নিয়মিত মোড 🏆",
   "regularModeDesc": "পয়েন্ট স্কোর করতে প্রশ্নের উত্তর দিন। আপনার ৩টি জীবন আছে। জীবন শেষ হয়ে গেলে খেলা শেষ হয়।",
@@ -67,5 +67,8 @@
   "splashStreak3": "গণিতের জাদুকর!",
   "splashProgress1": "দারুণ! {count}টি প্রশ্ন সমাধান করা হয়েছে!",
   "splashProgress2": "চালিয়ে যান!",
-  "splashProgress3": "আপনি একজন প্রতিভা!"
+  "splashProgress3": "আপনি একজন প্রতিভা!",
+  "gameSummary": "খেলার সারাংশ",
+  "questionsAnswered": "উত্তর দেওয়া হয়েছে",
+  "correctAnswers": "সঠিক উত্তর"
 }

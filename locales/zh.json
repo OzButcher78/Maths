@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "数学练习",
+  "gameTitle": "数学大师",
   "chooseDifficulty": "选择难度",
   "easy": "简单",
   "medium": "中等",
@@ -48,7 +48,7 @@
   "about": "关于",
   "privacy": "隐私",
   "rulesTitle": "游戏规则",
-  "aboutTitle": "关于数学练习",
+  "aboutTitle": "关于数学大师",
   "privacyTitle": "隐私政策",
   "regularModeTitle": "常规模式 🏆",
   "regularModeDesc": "回答问题得分。你有3条生命。当生命用完时，游戏结束。",
@@ -67,5 +67,8 @@
   "splashStreak3": "数学大师！",
   "splashProgress1": "太棒了！已解决{count}个问题！",
   "splashProgress2": "继续努力！",
-  "splashProgress3": "你是个天才！"
+  "splashProgress3": "你是个天才！",
+  "gameSummary": "游戏总结",
+  "questionsAnswered": "已回答",
+  "correctAnswers": "正确答案"
 }

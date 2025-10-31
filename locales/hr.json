@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Vježbanje Matematike",
+  "gameTitle": "Matematički Majstor",
   "chooseDifficulty": "Odaberi Težinu",
   "easy": "Lako",
   "medium": "Srednje",
@@ -48,7 +48,7 @@
   "about": "O nama",
   "privacy": "Privatnost",
   "rulesTitle": "Pravila Igre",
-  "aboutTitle": "O Vježbanju Matematike",
+  "aboutTitle": "O Matematičkom Majstoru",
   "privacyTitle": "Pravila o Privatnosti",
   "regularModeTitle": "Običan Način 🏆",
   "regularModeDesc": "Odgovarajte na pitanja kako biste osvojili bodove. Imate 3 života. Igra završava kada ostanete bez života.",
@@ -67,5 +67,8 @@
   "splashStreak3": "Matematički majstor!",
   "splashProgress1": "Sjajno! {count} pitanja riješeno!",
   "splashProgress2": "Samo tako nastavi!",
-  "splashProgress3": "Ti si genije!"
+  "splashProgress3": "Ti si genije!",
+  "gameSummary": "Sažetak Igre",
+  "questionsAnswered": "Odgovoreno",
+  "correctAnswers": "Točnih"
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats } from './types';
-import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, BEAT_THE_CLOCK_START_TIME, BEAT_THE_CLOCK_ADD_TIME, BEAT_THE_CLOCK_SUBTRACT_TIME, SPLASH_MESSAGES } from './constants';
+import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, BEAT_THE_CLOCK_START_TIME, BEAT_THE_CLOCK_ADD_TIME, BEAT_THE_CLOCK_SUBTRACT_TIME, SPLASH_MESSAGES, SCORE_MULTIPLIERS } from './constants';
 import { generateQuestion } from './services/gameLogic';
 import { isNameInappropriate } from './services/geminiService';
 import MenuScreen from './components/MenuScreen';
@@ -39,8 +39,9 @@ function App() {
   const [lastBonus, setLastBonus] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats>(initialStats);
-  const [splashMessageKey, setSplashMessageKey] = useState<string | null>(null);
+  const [splashData, setSplashData] = useState<{ messageKey: string; count?: number } | null>(null);
   const [justLostLife, setJustLostLife] = useState(false);
+  const [currentMultiplier, setCurrentMultiplier] = useState(1);
   
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -102,8 +103,9 @@ function App() {
     setQuestionCount(0);
     setAnswerFeedback(null);
     setPerformanceStats(initialStats);
-    setSplashMessageKey(null);
+    setSplashData(null);
     setJustLostLife(false);
+    setCurrentMultiplier(1);
     clearTimer();
   }, []);
 
@@ -114,6 +116,9 @@ function App() {
     setOperation(selectedOperation);
     setGameMode(selectedGameMode);
     
+    const initialMultiplier = SCORE_MULTIPLIERS[selectedDifficulty] || 1;
+    setCurrentMultiplier(initialMultiplier);
+
     const isAiMode = selectedDifficulty === 'ai';
     const firstQuestionCount = isAiMode ? 1 : 0;
     setQuestionCount(1);
@@ -126,11 +131,11 @@ function App() {
     setGameState('playing');
   }, [resetGame, unlockAudio]);
 
-  const showSplashScreen = (messages: string[]) => {
+  const showSplashScreen = (messages: string[], count?: number) => {
     const messageKey = messages[Math.floor(Math.random() * messages.length)];
-    setSplashMessageKey(messageKey);
+    setSplashData({ messageKey, count });
     playSplashScreenSound();
-    setTimeout(() => setSplashMessageKey(null), 1500);
+    setTimeout(() => setSplashData(null), 1500);
   };
 
   const handleAnswer = (userAnswer: number) => {
@@ -148,7 +153,19 @@ function App() {
         return { ...prevStats, [op]: newOpStats };
     });
     
-    const nextQuestionCount = questionCount + 1;
+    let splashScreenWillShow = false;
+    
+    let multiplier = currentMultiplier;
+    if(difficulty === 'ai') {
+        const tiers = Object.keys(SCORE_MULTIPLIERS.ai_tiers).map(Number).sort((a,b) => a-b);
+        for(const tier of tiers) {
+            if(questionCount >= tier) {
+                multiplier = SCORE_MULTIPLIERS.ai_tiers[tier];
+            }
+        }
+        setCurrentMultiplier(multiplier);
+    }
+
 
     if (isCorrect) {
       setAnswerFeedback('correct');
@@ -163,21 +180,29 @@ function App() {
           setLastBonus(`+${bonusPoints} ${t('streakBonus')}`);
       }
 
-      setScore(score + POINTS_CORRECT + bonusPoints);
+      setScore(score + (POINTS_CORRECT + bonusPoints) * multiplier);
       setStreak(newStreak);
       if(gameMode === 'beatTheClock') setTimer(t => t + BEAT_THE_CLOCK_ADD_TIME);
       
-      // Check for splash screen milestones
-      if (newStreak === 5 || newStreak === 10 || newStreak === 15) {
+      const isStreakMilestone = newStreak === 5 || newStreak === 10 || newStreak === 15;
+      const isProgressMilestone = (questionCount + 1) % 10 === 0 && (questionCount + 1) > 0;
+      
+      if (isStreakMilestone) {
         showSplashScreen(SPLASH_MESSAGES.streak);
-      } else if (nextQuestionCount % 10 === 0 && nextQuestionCount > 0) {
-        showSplashScreen(SPLASH_MESSAGES.progress);
+        splashScreenWillShow = true;
+      } else if (isProgressMilestone) {
+        // Prevent showing progress splash if a streak splash is imminent on the next question.
+        const willHitStreakMilestoneNext = (newStreak + 1) === 5 || (newStreak + 1) === 10 || (newStreak + 1) === 15;
+        if (!willHitStreakMilestoneNext) {
+          showSplashScreen(SPLASH_MESSAGES.progress, questionCount + 1);
+          splashScreenWillShow = true;
+        }
       }
 
     } else {
       setAnswerFeedback('incorrect');
       playIncorrectSound();
-      setScore(Math.max(0, score + POINTS_INCORRECT));
+      setScore(Math.max(0, score + (POINTS_INCORRECT * multiplier)));
       setStreak(0);
       
       if (gameMode === 'regular') {
@@ -196,22 +221,15 @@ function App() {
       }
     }
     
-    setQuestionCount(nextQuestionCount);
+    setQuestionCount(prev => prev + 1);
     
+    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 500 : 190);
+
     setTimeout(() => {
-      // Don't generate a new question if a splash screen is showing
-      if (splashMessageKey) {
-        setTimeout(() => {
-            const nextQCountForAI = difficulty === 'ai' ? nextQuestionCount : undefined;
-            setQuestion(generateQuestion(difficulty, operation, nextQCountForAI));
-            setAnswerFeedback(null);
-        }, 1000); // Wait a bit longer after splash
-      } else {
-        const nextQCountForAI = difficulty === 'ai' ? nextQuestionCount : undefined;
+        const nextQCountForAI = difficulty === 'ai' ? questionCount + 1 : undefined;
         setQuestion(generateQuestion(difficulty, operation, nextQCountForAI));
         setAnswerFeedback(null);
-      }
-    }, isCorrect ? 500 : 190);
+    }, delay);
   };
   
   const handleAddToLeaderboard = async (name: string): Promise<string> => {
@@ -263,6 +281,7 @@ function App() {
             gameMode={gameMode}
             timer={timer}
             justLostLife={justLostLife}
+            multiplier={currentMultiplier}
           />
         );
       case 'gameOver':
@@ -274,6 +293,8 @@ function App() {
                 onPlayAgain={handlePlayAgain}
                 onShowStats={handleShowStats}
                 difficulty={difficulty}
+                gameMode={gameMode}
+                stats={performanceStats}
             />
         );
       case 'stats':
@@ -292,9 +313,9 @@ function App() {
 
   return (
     <div className="bg-gradient-to-br from-blue-400 to-indigo-600 min-h-screen text-white flex flex-col items-center justify-center p-4">
-      {splashMessageKey && <SplashScreen message={t(splashMessageKey).replace('{count}', (questionCount).toString())} />}
+      {splashData && <SplashScreen message={splashData.count ? t(splashData.messageKey).replace('{count}', splashData.count.toString()) : t(splashData.messageKey)} />}
       <main className="w-full max-w-2xl mx-auto bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl p-6 md:p-10 border border-white/30">
-        <h1 className="text-4xl md:text-6xl font-black text-center mb-6 tracking-wide text-shadow">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-center mb-6 tracking-wide text-shadow">
           {t('gameTitle')}
         </h1>
         {renderGameState()}
@@ -306,7 +327,7 @@ function App() {
              </button>
         )}
         {gameState === 'menu' && (
-          <div className="flex justify-center items-center gap-4 text-sm font-bold">
+          <div className="flex justify-center items-center gap-2 md:gap-4 text-sm font-bold">
             <button onClick={() => handleShowPage('rules')} className="hover:underline">{t('rules')}</button>
             <span>&bull;</span>
             <button onClick={() => handleShowPage('about')} className="hover:underline">{t('about')}</button>

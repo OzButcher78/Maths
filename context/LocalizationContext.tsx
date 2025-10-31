@@ -12,18 +12,18 @@ const LocalizationContext = createContext<LocalizationContextType | undefined>(u
 
 // Define supported languages
 export const supportedLanguages = [
+    { code: 'de', name: 'Deutsch' },
     { code: 'en', name: 'English' },
     { code: 'es', name: 'Español' },
     { code: 'fr', name: 'Français' },
-    { code: 'de', name: 'Deutsch' },
     { code: 'it', name: 'Italiano' },
     { code: 'pt', name: 'Português' },
-    { code: 'ru', name: 'Русский' },
+    { code: 'uk', name: 'Українська' },
     { code: 'hr', name: 'Hrvatski' },
 ];
 
 export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<string>('en');
+  const [language, setLanguage] = useState<string>('de');
   const [translations, setTranslations] = useState<Record<string, string>>({});
 
   const fetchTranslations = useCallback(async (lang: string) => {

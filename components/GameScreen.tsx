@@ -19,9 +19,10 @@ interface GameScreenProps {
   gameMode: GameMode;
   timer: number;
   justLostLife: boolean;
+  multiplier: number;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, lastBonus, onAnswerSubmit, answerFeedback, playButtonSound, gameMode, timer, justLostLife }) => {
+const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, lastBonus, onAnswerSubmit, answerFeedback, playButtonSound, gameMode, timer, justLostLife, multiplier }) => {
   const [answer, setAnswer] = useState('');
   const [showWrongAnswerOverlay, setShowWrongAnswerOverlay] = useState(false);
   const { t } = useLocalization();
@@ -73,10 +74,15 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
       <div className="w-full flex justify-between items-center px-4 pt-2">
         <div className="flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full">
           <StarIcon />
-          <span className="text-2xl font-bold">{score}</span>
+          <span className="text-xl md:text-2xl font-bold">{score}</span>
+          {multiplier > 1 && (
+            <span className="text-sm md:text-base font-bold text-yellow-300 bg-yellow-600/50 px-2 rounded-full">
+              x{multiplier}
+            </span>
+          )}
         </div>
         {(gameMode === 'timeAttack' || gameMode === 'beatTheClock') && (
-            <div className="flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full text-2xl font-bold">
+            <div className="flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full text-xl md:text-2xl font-bold">
                 <span>⏱️</span>
                 <span>{timer}</span>
             </div>

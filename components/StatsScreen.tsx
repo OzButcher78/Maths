@@ -21,7 +21,7 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ stats, onBack }) => {
 
   return (
     <div className="flex flex-col items-center gap-6 text-center animate-fade-in">
-      <h2 className="text-4xl font-black text-yellow-300">{t('statsTitle')}</h2>
+      <h2 className="text-3xl md:text-4xl font-black text-yellow-300">{t('statsTitle')}</h2>
       
       <div className="w-full bg-black/20 p-4 rounded-xl space-y-3">
         {operations.map(op => {

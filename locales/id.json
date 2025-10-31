@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Latihan Matematika",
+  "gameTitle": "Master Matematika",
   "chooseDifficulty": "Pilih Kesulitan",
   "easy": "Mudah",
   "medium": "Sedang",
@@ -48,7 +48,7 @@
   "about": "Tentang",
   "privacy": "Privasi",
   "rulesTitle": "Aturan Permainan",
-  "aboutTitle": "Tentang Latihan Matematika",
+  "aboutTitle": "Tentang Master Matematika",
   "privacyTitle": "Kebijakan Privasi",
   "regularModeTitle": "Mode Biasa 🏆",
   "regularModeDesc": "Jawab pertanyaan untuk mencetak poin. Anda memiliki 3 nyawa. Permainan berakhir ketika Anda kehabisan nyawa.",
@@ -67,5 +67,8 @@
   "splashStreak3": "Master Matematika!",
   "splashProgress1": "Luar biasa! {count} pertanyaan terjawab!",
   "splashProgress2": "Teruslah berusaha!",
-  "splashProgress3": "Anda jenius!"
+  "splashProgress3": "Anda jenius!",
+  "gameSummary": "Ringkasan Permainan",
+  "questionsAnswered": "Terjawab",
+  "correctAnswers": "Benar"
 }

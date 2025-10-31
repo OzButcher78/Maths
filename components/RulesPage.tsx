@@ -10,7 +10,7 @@ const RulesPage: React.FC<RulesPageProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col items-center gap-6 text-center animate-fade-in max-w-lg mx-auto">
-      <h2 className="text-4xl font-black text-yellow-300">{t('rulesTitle')}</h2>
+      <h2 className="text-3xl md:text-4xl font-black text-yellow-300">{t('rulesTitle')}</h2>
       
       <div className="w-full bg-black/20 p-4 rounded-xl space-y-4 text-left">
         <div>

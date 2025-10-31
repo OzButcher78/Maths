@@ -35,7 +35,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ scores }) => {
 
   return (
     <div className="w-full bg-black/20 p-4 rounded-xl">
-      <h3 className="text-2xl font-bold mb-4 text-center text-yellow-300">{t('leaderboardTitle')}</h3>
+      <h3 className="text-xl md:text-2xl font-bold mb-4 text-center text-yellow-300">{t('leaderboardTitle')}</h3>
       {scores.length === 0 ? (
         <p className="text-center text-white/70">{t('noScores')}</p>
       ) : (

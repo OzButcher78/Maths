@@ -1,6 +1,6 @@
 
 {
-  "gameTitle": "Mathe-Übung",
+  "gameTitle": "Mathe-Meister",
   "chooseDifficulty": "Schwierigkeit wählen",
   "easy": "Leicht",
   "medium": "Mittel",
@@ -48,7 +48,7 @@
   "about": "Über",
   "privacy": "Datenschutz",
   "rulesTitle": "Spielregeln",
-  "aboutTitle": "Über Mathe-Übung",
+  "aboutTitle": "Über Mathe-Meister",
   "privacyTitle": "Datenschutzerklärung",
   "regularModeTitle": "Normaler Modus 🏆",
   "regularModeDesc": "Beantworte Fragen, um Punkte zu sammeln. Du hast 3 Leben. Das Spiel endet, wenn du keine Leben mehr hast.",
@@ -57,7 +57,7 @@
   "beatTheClockModeTitle": "Gegen-die-Uhr-Modus ⏳",
   "beatTheClockModeDesc": "Beginne mit 30 Sekunden. Richtige Antworten geben Zeit hinzu, falsche ziehen Zeit ab. Wie lange kannst du durchhalten?",
   "aboutAppDescription": "Ein unterhaltsames und einfaches Spiel, das jungen Lernenden hilft, ihre mathematischen Fähigkeiten auf ansprechende Weise zu üben und zu verbessern.",
-  "builtWithLove": "Mit ❤️ für junge Lernende überall auf der Welt entwickelt.",
+  "builtWithLove": "Für junge Lernende überall auf der Welt entwickelt.",
   "version": "Version 2.0",
   "author": "von Dieter Balmer",
   "copyright": "© 2025 Balmer Storm Solutions",
@@ -67,5 +67,8 @@
   "splashStreak3": "Mathe-Meister!",
   "splashProgress1": "Super! {count} Fragen gelöst!",
   "splashProgress2": "Weiter so!",
-  "splashProgress3": "Du bist ein Genie!"
+  "splashProgress3": "Du bist ein Genie!",
+  "gameSummary": "Spielzusammenfassung",
+  "questionsAnswered": "Beantwortet",
+  "correctAnswers": "Richtig"
 }
