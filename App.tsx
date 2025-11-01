@@ -317,7 +317,7 @@ function App() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-indigo-400 to-purple-500 min-h-screen text-white flex flex-col items-center justify-center p-4">
+    <div className="bg-gradient-to-br from-sky-400 to-blue-600 min-h-screen text-white flex flex-col items-center justify-center p-4">
       {splashData && <SplashScreen message={splashData.count ? t(splashData.messageKey).replace('{count}', splashData.count.toString()) : t(splashData.messageKey)} />}
       <main className="w-full max-w-lg mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-8 border border-white/20">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-center mb-4 text-white drop-shadow-lg">

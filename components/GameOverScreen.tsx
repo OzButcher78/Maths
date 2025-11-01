@@ -82,7 +82,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={15}
-            className="w-full text-center text-2xl p-2 rounded-lg bg-white/90 text-indigo-800 placeholder-indigo-400/50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
+            className="w-full text-center text-2xl p-2 rounded-lg bg-white/90 text-blue-800 placeholder-blue-400/50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
             placeholder={t('namePlaceholder')}
           />
           {error && <p className="text-red-300 font-bold">{error}</p>}

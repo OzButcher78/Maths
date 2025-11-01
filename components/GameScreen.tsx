@@ -89,13 +89,13 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
       </div>
       
       <div className="bg-white/30 p-6 rounded-2xl shadow-lg w-full">
-        <p className="text-5xl md:text-7xl font-black tracking-wider text-indigo-900 drop-shadow-lg">
+        <p className="text-5xl md:text-7xl font-black tracking-wider text-blue-900 drop-shadow-lg">
           {question.num1} {question.operator} {question.num2}
         </p>
       </div>
 
       <div className="w-full max-w-xs h-16 bg-white/90 rounded-lg flex items-center justify-center">
-        <span className="text-4xl font-bold text-indigo-800">{answer || '?'}</span>
+        <span className="text-4xl font-bold text-blue-800">{answer || '?'}</span>
       </div>
       
       <Keypad
