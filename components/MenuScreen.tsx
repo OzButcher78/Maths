@@ -83,8 +83,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
       onClick={onClick}
       className={`w-full py-2.5 px-2 text-base font-bold rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
       ${isSelected 
-        ? 'bg-white text-purple-700 scale-105 border-white/50' 
-        : 'bg-white/10 text-white hover:bg-white/20 border-white/20'} 
+        ? 'bg-white text-purple-700 scale-105 border-white/75' 
+        : 'bg-white/10 text-white hover:bg-white/20 border-white/30'} 
       ${className}`}
     >
       {children}
@@ -129,15 +129,15 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
       
       <div>
         <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseOperation')}</h2>
-        <div className="grid grid-cols-5 gap-2.5">
+        <div className="grid grid-cols-5 gap-2">
           {operations.map(o => (
              <button
               key={o}
               onClick={() => { playButtonSound(); setSelectedOperation(o); }}
-              className={`w-14 h-14 flex items-center justify-center text-3xl font-black rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
+              className={`w-12 h-12 flex items-center justify-center text-2xl font-black rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
               ${selectedOperation === o 
-                ? 'bg-white text-purple-700 scale-105 border-white/50' 
-                : 'bg-white/10 text-white hover:bg-white/20 border-white/20'}`}
+                ? 'bg-white text-purple-700 scale-105 border-white/75' 
+                : 'bg-white/10 text-white hover:bg-white/20 border-white/30'}`}
             >
               {operationSymbols[o]}
             </button>
