@@ -59,7 +59,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
                     <p className="text-sm opacity-80">{t('accuracy')}</p>
                 </div>
             )}
-             {(gameMode === 'timeAttack' || gameMode === 'beatTheClock') && (
+             {gameMode === 'timeAttack' && (
                 <>
                     <div>
                         <p className="text-3xl font-bold">{totalQuestions}</p>

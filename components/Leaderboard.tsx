@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScoreEntry, GameMode, Difficulty } from '../types';
+import { ScoreEntry, GameMode, Difficulty, Operation } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 
 interface LeaderboardProps {
@@ -8,9 +8,8 @@ interface LeaderboardProps {
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ scores }) => {
   const { t } = useLocalization();
-  const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'ai'];
 
-  const operationSymbols = {
+  const operationSymbols: Record<Operation, string> = {
     addition: '+',
     subtraction: '-',
     multiplication: 'x',
@@ -18,58 +17,61 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ scores }) => {
     random: '?',
   };
 
-  const getDifficultyDisplay = (difficulty: 'easy' | 'medium' | 'hard' | 'ai') => {
-    if (difficulty === 'ai') return t('ai');
-    return t(difficulty);
-  }
-
   const gameModeDisplay: Record<GameMode, string> = {
     regular: '🏆',
     timeAttack: '⏱️',
-    beatTheClock: '⏳'
   };
   const gameModeTitle: Record<GameMode, string> = {
     regular: t('regular'),
     timeAttack: t('timeAttack'),
-    beatTheClock: t('beatTheClock')
   };
+
+  const difficultyColors: Record<Difficulty, string> = {
+    easy: 'bg-green-500/80 text-white',
+    medium: 'bg-blue-500/80 text-white',
+    hard: 'bg-orange-500/80 text-white',
+    ai: 'bg-purple-600/80 text-white',
+  };
+
+  const getDifficultyDisplay = (difficulty: Difficulty) => {
+    if (difficulty === 'ai') return t('ai');
+    return t(difficulty);
+  }
+
+  const topScores = scores
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 20);
 
   return (
     <div className="w-full bg-black/20 p-4 rounded-xl">
       <h3 className="text-xl md:text-2xl font-bold mb-4 text-center text-yellow-300">{t('leaderboardTitle')}</h3>
-      <div className="space-y-6">
-        {difficulties.map(difficulty => {
-          const filteredScores = scores
-            .filter(score => score.difficulty === difficulty)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5);
-
-          return (
-            <div key={difficulty}>
-              <h4 className="text-lg font-bold mb-2 text-center text-white capitalize border-b-2 border-white/20 pb-1">{getDifficultyDisplay(difficulty)}</h4>
-              {filteredScores.length === 0 ? (
-                <p className="text-center text-white/70 py-2">{t('noScores')}</p>
-              ) : (
-                <ol className="space-y-2">
-                  {filteredScores.map((entry, index) => (
-                    <li key={index} className={`flex items-center justify-between p-2 rounded-md ${index < 3 ? 'bg-yellow-500/30' : 'bg-black/20'}`}>
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-lg w-6 text-right">{index + 1}.</span>
-                        <span className="font-bold text-white">{entry.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                         <span title={gameModeTitle[entry.gameMode]} className="hidden md:inline-block bg-white/20 px-2 py-0.5 rounded-full text-base">{gameModeDisplay[entry.gameMode]}</span>
-                         <span className="bg-white/20 px-2 py-0.5 rounded-full text-lg font-black">{operationSymbols[entry.operation]}</span>
-                         <span className="font-black text-xl text-yellow-300">{entry.score}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {topScores.length === 0 ? (
+        <p className="text-center text-white/70 py-4">{t('noScores')}</p>
+      ) : (
+        <ol className="space-y-2">
+          {topScores.map((entry, index) => (
+            <li key={index} className={`flex items-center justify-between p-2 rounded-lg transition-colors ${index < 3 ? 'bg-blue-500/40' : 'bg-blue-400/20'}`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="font-bold text-lg w-6 text-right flex-shrink-0">{index + 1}.</span>
+                <span className="font-bold text-white truncate">{entry.name}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm flex-shrink-0">
+                 {entry.operation !== 'multiplication' && (
+                    <span 
+                        className={`hidden sm:inline-block text-xs font-bold px-2 py-0.5 rounded-full uppercase ${difficultyColors[entry.difficulty]}`}
+                        title={getDifficultyDisplay(entry.difficulty)}
+                    >
+                        {getDifficultyDisplay(entry.difficulty)}
+                    </span>
+                 )}
+                 <span title={gameModeTitle[entry.gameMode]} className="bg-white/20 px-2 py-0.5 rounded-full text-base">{gameModeDisplay[entry.gameMode]}</span>
+                 <span className="bg-white/20 px-2 py-0.5 rounded-full text-lg font-black">{operationSymbols[entry.operation]}</span>
+                 <span className="font-black text-xl text-yellow-300 w-12 text-right">{entry.score}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 };

@@ -4,14 +4,14 @@ import Leaderboard from './Leaderboard';
 import { useLocalization } from '../context/LocalizationContext';
 
 interface MenuScreenProps {
-  onStartGame: (difficulty: Difficulty, operation: Operation, gameMode: GameMode) => void;
+  onStartGame: (operation: Operation, difficulty: Difficulty | null, gameMode: GameMode) => void;
   playButtonSound: () => void;
   leaderboard: ScoreEntry[];
 }
 
 const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'ai'];
 const operations: Operation[] = ['addition', 'subtraction', 'multiplication', 'division', 'random'];
-const gameModes: GameMode[] = ['regular', 'timeAttack', 'beatTheClock'];
+const gameModes: GameMode[] = ['regular', 'timeAttack'];
 
 const operationSymbols = {
     addition: '+',
@@ -24,7 +24,6 @@ const operationSymbols = {
 const gameModeIcons: Record<GameMode, string> = {
     regular: '🏆',
     timeAttack: '⏱️',
-    beatTheClock: '⏳',
 };
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, leaderboard }) => {
@@ -36,8 +35,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
 
   const handleStart = () => {
     playButtonSound();
-    if (selectedDifficulty && selectedOperation && selectedGameMode) {
-      onStartGame(selectedDifficulty, selectedOperation, selectedGameMode);
+    if (selectedOperation && selectedGameMode) {
+      if (selectedOperation === 'multiplication' || selectedDifficulty) {
+        onStartGame(selectedOperation, selectedDifficulty, selectedGameMode);
+      }
     }
   };
 
@@ -61,7 +62,6 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
   const gameModeDisplay = {
     regular: t('regular'),
     timeAttack: t('timeAttack'),
-    beatTheClock: t('beatTheClock'),
   };
 
   if (showLeaderboard) {
@@ -90,46 +90,15 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
       {children}
     </button>
   );
+  
+  const isStartDisabled = !selectedOperation || !selectedGameMode || (selectedOperation !== 'multiplication' && !selectedDifficulty);
 
   return (
     <div className="flex flex-col items-center gap-5 animate-fade-in">
       
       <div className="w-full">
-        <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseGameMode')}</h2>
-        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2.5">
-          {gameModes.map(m => (
-            <SelectionButton
-              key={m}
-              onClick={() => { playButtonSound(); setSelectedGameMode(m); }}
-              isSelected={selectedGameMode === m}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-lg">{gameModeIcons[m]}</span>
-                <span>{gameModeDisplay[m]}</span>
-              </div>
-            </SelectionButton>
-          ))}
-        </div>
-      </div>
-
-      <div className="w-full">
-        <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseDifficulty')}</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {difficulties.map(d => (
-            <SelectionButton
-              key={d}
-              onClick={() => { playButtonSound(); setSelectedDifficulty(d); }}
-              isSelected={selectedDifficulty === d}
-            >
-              {difficultyDisplay[d]}
-            </SelectionButton>
-          ))}
-        </div>
-      </div>
-      
-      <div>
         <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseOperation')}</h2>
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+        <div className="flex justify-center gap-2">
           {operations.map(o => (
              <button
               key={o}
@@ -145,10 +114,45 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
         </div>
       </div>
 
+      <div className="w-full">
+        <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseGameMode')}</h2>
+        <div className="grid grid-cols-2 gap-2.5">
+          {gameModes.map(m => (
+            <SelectionButton
+              key={m}
+              onClick={() => { playButtonSound(); setSelectedGameMode(m); }}
+              isSelected={selectedGameMode === m}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-2xl">{gameModeIcons[m]}</span>
+                <span>{gameModeDisplay[m]}</span>
+              </div>
+            </SelectionButton>
+          ))}
+        </div>
+      </div>
+      
+      {selectedOperation !== 'multiplication' && (
+        <div className="w-full animate-fade-in">
+          <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseDifficulty')}</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {difficulties.map(d => (
+              <SelectionButton
+                key={d}
+                onClick={() => { playButtonSound(); setSelectedDifficulty(d); }}
+                isSelected={selectedDifficulty === d}
+              >
+                {difficultyDisplay[d]}
+              </SelectionButton>
+            ))}
+          </div>
+        </div>
+      )}
+      
       <div className="w-full max-w-xs flex flex-col gap-3 mt-2">
         <button
             onClick={handleStart}
-            disabled={!selectedOperation || !selectedDifficulty || !selectedGameMode}
+            disabled={isStartDisabled}
             className="w-full py-3 text-xl font-bold text-green-900 bg-green-400 rounded-xl shadow-lg hover:bg-green-500 transition-colors duration-200 ease-in-out disabled:bg-slate-500/40 disabled:text-white/60 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-300"
         >
             {t('startGame')}

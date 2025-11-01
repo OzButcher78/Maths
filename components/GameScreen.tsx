@@ -6,12 +6,13 @@ import StarIcon from './icons/StarIcon';
 import Keypad from './Keypad';
 import { useLocalization } from '../context/LocalizationContext';
 import { INITIAL_LIVES } from '../constants';
+import TickIcon from './icons/TickIcon';
+import CrossIcon from './icons/CrossIcon';
 
 interface GameScreenProps {
   question: Question;
   score: number;
   lives: number;
-  streak: number;
   lastBonus: string | null;
   onAnswerSubmit: (answer: number) => void;
   answerFeedback: 'correct' | 'incorrect' | null;
@@ -21,9 +22,11 @@ interface GameScreenProps {
   timer: number;
   justLostLife: boolean;
   multiplier: number;
+  correctTally: number;
+  incorrectTally: number;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, lastBonus, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier }) => {
+const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, lastBonus, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, correctTally, incorrectTally }) => {
   const [answer, setAnswer] = useState('');
   const { t } = useLocalization();
 
@@ -71,7 +74,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
             </span>
           )}
         </div>
-        {(gameMode === 'timeAttack' || gameMode === 'beatTheClock') && (
+        {gameMode === 'timeAttack' && (
             <div className="flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full text-xl md:text-2xl font-bold">
                 <span>⏱️</span>
                 <span>{timer}</span>
@@ -105,9 +108,29 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
         playButtonSound={playButtonSound}
       />
 
-      <div className="h-10 text-xl font-bold text-yellow-300">
-        {streak > 1 && <span>🔥 {streak} {t('inARow')}</span>}
-        {lastBonus && <span className="block animate-ping-once">{lastBonus}</span>}
+      <div className="w-full flex justify-center gap-8 mt-2 text-xl font-bold">
+        <div className="flex items-center gap-2 text-green-300">
+          <TickIcon className="w-6 h-6" />
+          <span>{correctTally}</span>
+        </div>
+        <div className="flex items-center gap-2 text-red-300">
+          <CrossIcon className="w-6 h-6" />
+          <span>{incorrectTally}</span>
+        </div>
+      </div>
+
+      <div className="h-10 flex items-center justify-center gap-4">
+        {answerFeedback === 'correct' && (
+            <div className="animate-fade-in">
+                <TickIcon />
+            </div>
+        )}
+        {answerFeedback === 'incorrect' && (
+            <div className="animate-fade-in">
+                <CrossIcon />
+            </div>
+        )}
+        {lastBonus && <span className="text-xl font-bold text-yellow-300 block animate-ping-once">{lastBonus}</span>}
       </div>
     </div>
   );

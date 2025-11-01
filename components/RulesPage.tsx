@@ -21,10 +21,6 @@ const RulesPage: React.FC<RulesPageProps> = ({ onBack }) => {
           <h3 className="text-2xl font-bold text-white mb-1">{t('timeAttackModeTitle')}</h3>
           <p className="text-white/90">{t('timeAttackModeDesc')}</p>
         </div>
-        <div>
-          <h3 className="text-2xl font-bold text-white mb-1">{t('beatTheClockModeTitle')}</h3>
-          <p className="text-white/90">{t('beatTheClockModeDesc')}</p>
-        </div>
       </div>
 
       <button onClick={onBack} className="w-full max-w-sm mt-4 py-3 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105">

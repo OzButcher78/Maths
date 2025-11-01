@@ -28,13 +28,22 @@ export const SCORE_MULTIPLIERS: {
     }
 };
 
+// New scoring system for multiplication based on row difficulty
+export const MULTIPLICATION_ROW_POINTS = {
+  easy: [1, 2, 5, 10],
+  medium: [3, 4, 6, 7, 11],
+  hard: [8, 9, 12],
+};
+
+export const MULTIPLICATION_ROW_SCORES = {
+  easy: 2,
+  medium: 3,
+  hard: 5,
+};
+
 
 // Game Mode Constants
 export const TIME_ATTACK_DURATION = 60; // seconds
-export const BEAT_THE_CLOCK_START_TIME = 30; // seconds
-export const BEAT_THE_CLOCK_ADD_TIME = 2; // seconds added for correct answer
-export const BEAT_THE_CLOCK_SUBTRACT_TIME = 3; // seconds subtracted for incorrect answer
-
 export const SPLASH_MESSAGES = {
     streak: [
         "splashStreak1",

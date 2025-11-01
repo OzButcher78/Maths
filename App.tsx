@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats } from './types';
-import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, BEAT_THE_CLOCK_START_TIME, BEAT_THE_CLOCK_ADD_TIME, BEAT_THE_CLOCK_SUBTRACT_TIME, SPLASH_MESSAGES, SCORE_MULTIPLIERS } from './constants';
+import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats, MultiplicationTableOption } from './types';
+import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, SPLASH_MESSAGES, SCORE_MULTIPLIERS, MULTIPLICATION_ROW_POINTS, MULTIPLICATION_ROW_SCORES } from './constants';
 import { generateQuestion } from './services/gameLogic';
 import { isNameInappropriate } from './services/geminiService';
 import MenuScreen from './components/MenuScreen';
@@ -12,6 +12,8 @@ import AboutPage from './components/AboutPage';
 import PrivacyPage from './components/PrivacyPage';
 import LanguageSelector from './components/LanguageSelector';
 import SplashScreen from './components/SplashScreen';
+import MultiplicationSetupScreen from './components/MultiplicationSetupScreen';
+import ScoringPage from './components/ScoringPage';
 import useSounds from './hooks/useSounds';
 import { useLocalization } from './context/LocalizationContext';
 
@@ -44,6 +46,9 @@ function App() {
   const [justLostLife, setJustLostLife] = useState(false);
   const [currentMultiplier, setCurrentMultiplier] = useState(1);
   
+  const [pendingGameMode, setPendingGameMode] = useState<GameMode | null>(null);
+  const [multiplicationTable, setMultiplicationTable] = useState<MultiplicationTableOption | null>(null);
+
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { t } = useLocalization();
@@ -69,7 +74,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (gameState === 'playing' && (gameMode === 'timeAttack' || gameMode === 'beatTheClock')) {
+    if (gameState === 'playing' && gameMode === 'timeAttack') {
         timerIntervalRef.current = setInterval(() => {
             setTimer(prev => {
                 if (prev <= 1) {
@@ -108,30 +113,52 @@ function App() {
     setShowWrongAnswerOverlay(false);
     setJustLostLife(false);
     setCurrentMultiplier(1);
+    setMultiplicationTable(null);
     clearTimer();
   }, []);
 
-  const startGame = useCallback((selectedDifficulty: Difficulty, selectedOperation: Operation, selectedGameMode: GameMode) => {
+  const startGame = useCallback((selectedDifficulty: Difficulty | null, selectedOperation: Operation, selectedGameMode: GameMode, selectedMultiplicationTable: MultiplicationTableOption | null) => {
     unlockAudio();
     resetGame();
     setDifficulty(selectedDifficulty);
     setOperation(selectedOperation);
     setGameMode(selectedGameMode);
+    setMultiplicationTable(selectedMultiplicationTable);
     
-    const initialMultiplier = SCORE_MULTIPLIERS[selectedDifficulty] || 1;
-    setCurrentMultiplier(initialMultiplier);
+    if (selectedDifficulty) {
+      const initialMultiplier = SCORE_MULTIPLIERS[selectedDifficulty] || 1;
+      setCurrentMultiplier(initialMultiplier);
+    } else {
+      setCurrentMultiplier(1);
+    }
 
     const isAiMode = selectedDifficulty === 'ai';
     const firstQuestionCount = isAiMode ? 1 : 0;
     setQuestionCount(1);
     
     if (selectedGameMode === 'timeAttack') setTimer(TIME_ATTACK_DURATION);
-    if (selectedGameMode === 'beatTheClock') setTimer(BEAT_THE_CLOCK_START_TIME);
 
-    setQuestion(generateQuestion(selectedDifficulty, selectedOperation, firstQuestionCount));
+    setQuestion(generateQuestion(selectedDifficulty, selectedOperation, firstQuestionCount, selectedMultiplicationTable, null));
 
     setGameState('playing');
   }, [resetGame, unlockAudio]);
+
+  const handleGameSelection = (selectedOperation: Operation, selectedDifficulty: Difficulty | null, selectedGameMode: GameMode) => {
+    playButtonPressSound();
+    if (selectedOperation === 'multiplication') {
+        setPendingGameMode(selectedGameMode);
+        setGameState('multiplicationSetup');
+    } else if (selectedDifficulty) {
+        startGame(selectedDifficulty, selectedOperation, selectedGameMode, null);
+    }
+  };
+
+  const handleStartMultiplicationGame = (tables: MultiplicationTableOption) => {
+    if (pendingGameMode) {
+       startGame(null, 'multiplication', pendingGameMode, tables);
+       setPendingGameMode(null);
+    }
+  };
 
   const showSplashScreen = (messages: string[], count?: number) => {
     const messageKey = messages[Math.floor(Math.random() * messages.length)];
@@ -141,7 +168,7 @@ function App() {
   };
 
   const handleAnswer = (userAnswer: number) => {
-    if (!question || !operation || !difficulty || !gameMode) return;
+    if (!question || !operation || !gameMode) return;
     
     setLastBonus(null);
     const isCorrect = userAnswer === question.answer;
@@ -182,9 +209,23 @@ function App() {
           setLastBonus(`+${bonusPoints} ${t('streakBonus')}`);
       }
 
-      setScore(score + (POINTS_CORRECT + bonusPoints) * multiplier);
+      let pointsToAdd = 0;
+      if (operation === 'multiplication' && difficulty === null) {
+        let basePoints = 1; // Default points
+        if (MULTIPLICATION_ROW_POINTS.easy.includes(question.num1)) {
+          basePoints = MULTIPLICATION_ROW_SCORES.easy;
+        } else if (MULTIPLICATION_ROW_POINTS.medium.includes(question.num1)) {
+          basePoints = MULTIPLICATION_ROW_SCORES.medium;
+        } else if (MULTIPLICATION_ROW_POINTS.hard.includes(question.num1)) {
+          basePoints = MULTIPLICATION_ROW_SCORES.hard;
+        }
+        pointsToAdd = basePoints + bonusPoints;
+      } else {
+        pointsToAdd = (POINTS_CORRECT + bonusPoints) * multiplier;
+      }
+
+      setScore(score + pointsToAdd);
       setStreak(newStreak);
-      if(gameMode === 'beatTheClock') setTimer(t => t + BEAT_THE_CLOCK_ADD_TIME);
       
       const isStreakMilestone = newStreak === 5 || newStreak === 10 || newStreak === 15;
       const isProgressMilestone = (questionCount + 1) % 10 === 0 && (questionCount + 1) > 0;
@@ -205,7 +246,7 @@ function App() {
       setAnswerFeedback('incorrect');
       setShowWrongAnswerOverlay(true);
       playIncorrectSound();
-      setScore(Math.max(0, score + (POINTS_INCORRECT * multiplier)));
+      setScore(Math.max(0, score + (POINTS_INCORRECT * (operation === 'multiplication' && difficulty === null ? 1 : multiplier))));
       setStreak(0);
       
       if (gameMode === 'regular') {
@@ -219,9 +260,6 @@ function App() {
             return;
         }
       }
-      if (gameMode === 'beatTheClock') {
-          setTimer(t => Math.max(0, t - BEAT_THE_CLOCK_SUBTRACT_TIME));
-      }
     }
     
     setQuestionCount(prev => prev + 1);
@@ -230,19 +268,22 @@ function App() {
 
     setTimeout(() => {
         const nextQCountForAI = difficulty === 'ai' ? questionCount + 1 : undefined;
-        setQuestion(generateQuestion(difficulty, operation, nextQCountForAI));
+        setQuestion(generateQuestion(difficulty, question.operation as Operation, nextQCountForAI, multiplicationTable, question));
         setAnswerFeedback(null);
         setShowWrongAnswerOverlay(false);
     }, delay);
   };
   
   const handleAddToLeaderboard = async (name: string): Promise<string> => {
-    if(!difficulty || !operation || !gameMode) return "Error: Game settings not found.";
+    if(!gameMode) return "Error: Game settings not found.";
 
     const inappropriate = await isNameInappropriate(name);
     if (inappropriate) return t('nameInappropriateError');
+    
+    const currentDifficulty = difficulty || 'hard'; // Default for leaderboard if multiplication
+    const currentOperation = operation || 'random';
 
-    const newEntry: ScoreEntry = { name, score, difficulty, operation, gameMode };
+    const newEntry: ScoreEntry = { name, score, difficulty: currentDifficulty, operation: currentOperation, gameMode };
     saveLeaderboard([...leaderboard, newEntry]);
     return "Success";
   };
@@ -252,13 +293,14 @@ function App() {
     setDifficulty(null);
     setOperation(null);
     setGameMode(null);
+    setPendingGameMode(null);
     setGameState('menu');
   };
   
   const handleExitGame = () => {
     playButtonPressSound();
     clearTimer();
-    handlePlayAgain();
+    setGameState('gameOver');
   };
 
   const handleShowStats = () => setGameState('stats');
@@ -268,16 +310,26 @@ function App() {
     playButtonPressSound();
     setGameState(page);
   };
+  
+  const handleBackToMenuFromSetup = () => {
+    playButtonPressSound();
+    setPendingGameMode(null);
+    setGameState('menu');
+  };
 
   const renderGameState = () => {
     switch (gameState) {
-      case 'playing':
+      case 'playing': {
+        const allOps: Operation[] = ['addition', 'subtraction', 'multiplication', 'division', 'random'];
+        const totalCorrect = allOps.reduce((sum, op) => sum + (performanceStats[op]?.correct || 0), 0);
+        const totalQuestions = allOps.reduce((sum, op) => sum + (performanceStats[op]?.total || 0), 0);
+        const totalIncorrect = totalQuestions - totalCorrect;
+
         return question && gameMode && (
           <GameScreen
             question={question}
             score={score}
             lives={lives}
-            streak={streak}
             lastBonus={lastBonus}
             onAnswerSubmit={handleAnswer}
             answerFeedback={answerFeedback}
@@ -287,8 +339,11 @@ function App() {
             timer={timer}
             justLostLife={justLostLife}
             multiplier={currentMultiplier}
+            correctTally={totalCorrect}
+            incorrectTally={totalIncorrect}
           />
         );
+      }
       case 'gameOver':
         return (
             <GameOverScreen 
@@ -306,44 +361,56 @@ function App() {
         return <StatsScreen stats={performanceStats} onBack={handleBackToGameOver} />;
       case 'rules':
         return <RulesPage onBack={handlePlayAgain} />;
+      case 'scoring':
+        return <ScoringPage onBack={handlePlayAgain} />;
       case 'about':
         return <AboutPage onBack={handlePlayAgain} />;
       case 'privacy':
         return <PrivacyPage onBack={handlePlayAgain} />;
+      case 'multiplicationSetup':
+        return <MultiplicationSetupScreen onStart={handleStartMultiplicationGame} onBack={handleBackToMenuFromSetup} playButtonSound={playButtonPressSound} />;
       case 'menu':
       default:
-        return <MenuScreen onStartGame={startGame} playButtonSound={playButtonPressSound} leaderboard={leaderboard} />;
+        return <MenuScreen onStartGame={handleGameSelection} playButtonSound={playButtonPressSound} leaderboard={leaderboard} />;
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-sky-400 to-blue-600 min-h-screen text-white flex flex-col items-center justify-center p-4">
+    <div className="bg-gradient-to-br from-sky-400 to-blue-600 min-h-screen text-white flex flex-col items-center justify-center sm:p-4">
       {splashData && <SplashScreen message={splashData.count ? t(splashData.messageKey).replace('{count}', splashData.count.toString()) : t(splashData.messageKey)} />}
-      <main className="w-full max-w-lg mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-8 border border-white/20">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-center mb-4 text-white drop-shadow-lg">
-          {t('gameTitle')}
-        </h1>
-        {renderGameState()}
-      </main>
-      <footer className="w-full max-w-lg mx-auto pt-4 text-center">
-        {gameState === 'playing' && (
-             <button onClick={handleExitGame} className="bg-red-500/80 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors">
-                {t('exitGame')}
-             </button>
-        )}
-        {gameState === 'menu' && (
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex justify-center items-center gap-2 md:gap-4 text-sm font-semibold text-white/80">
-              <button onClick={() => handleShowPage('rules')} className="hover:underline">{t('rules')}</button>
-              <span>&bull;</span>
-              <button onClick={() => handleShowPage('about')} className="hover:underline">{t('about')}</button>
-              <span>&bull;</span>
-              <button onClick={() => handleShowPage('privacy')} className="hover:underline">{t('privacy')}</button>
+      <div className="w-full max-w-lg mx-auto sm:p-8 bg-white/10 backdrop-blur-xl sm:rounded-3xl sm:shadow-2xl sm:border sm:border-white/20 flex flex-col justify-between min-h-screen sm:min-h-0 sm:h-auto">
+        <div className="p-4 flex flex-col flex-grow justify-between">
+            <div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-center mb-4 text-white drop-shadow-lg">
+                {t('gameTitle')}
+                </h1>
+                <div className="flex-grow flex flex-col justify-center">
+                    {renderGameState()}
+                </div>
             </div>
-             <LanguageSelector />
-          </div>
-        )}
-      </footer>
+            <footer className="pt-4 text-center">
+            {gameState === 'playing' && (
+                <button onClick={handleExitGame} className="bg-red-500/80 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors">
+                    {t('exitGame')}
+                </button>
+            )}
+            {gameState === 'menu' && (
+                <div className="flex flex-col items-center gap-3">
+                <div className="flex justify-center items-center gap-2 md:gap-4 text-sm font-semibold text-white/80">
+                    <button onClick={() => handleShowPage('rules')} className="hover:underline">{t('rules')}</button>
+                    <span>&bull;</span>
+                    <button onClick={() => handleShowPage('scoring')} className="hover:underline">{t('scoring')}</button>
+                    <span>&bull;</span>
+                    <button onClick={() => handleShowPage('about')} className="hover:underline">{t('about')}</button>
+                    <span>&bull;</span>
+                    <button onClick={() => handleShowPage('privacy')} className="hover:underline">{t('privacy')}</button>
+                </div>
+                <LanguageSelector />
+                </div>
+            )}
+            </footer>
+        </div>
+      </div>
     </div>
   );
 }
