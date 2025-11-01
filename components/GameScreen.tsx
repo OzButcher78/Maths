@@ -15,6 +15,7 @@ interface GameScreenProps {
   lastBonus: string | null;
   onAnswerSubmit: (answer: number) => void;
   answerFeedback: 'correct' | 'incorrect' | null;
+  showWrongAnswerOverlay: boolean;
   playButtonSound: () => void;
   gameMode: GameMode;
   timer: number;
@@ -22,24 +23,13 @@ interface GameScreenProps {
   multiplier: number;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, lastBonus, onAnswerSubmit, answerFeedback, playButtonSound, gameMode, timer, justLostLife, multiplier }) => {
+const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, lastBonus, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier }) => {
   const [answer, setAnswer] = useState('');
-  const [showWrongAnswerOverlay, setShowWrongAnswerOverlay] = useState(false);
   const { t } = useLocalization();
 
   useEffect(() => {
     setAnswer('');
   }, [question]);
-
-  useEffect(() => {
-    if (answerFeedback === 'incorrect') {
-      setShowWrongAnswerOverlay(true);
-      const timer = setTimeout(() => {
-        setShowWrongAnswerOverlay(false);
-      }, 190);
-      return () => clearTimeout(timer);
-    }
-  }, [answerFeedback, question]);
   
   const handleSubmit = () => {
     if (answer === '') return;

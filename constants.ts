@@ -18,13 +18,13 @@ export const SCORE_MULTIPLIERS: {
     ai_tiers: { [key: number]: number };
 } = {
     easy: 1,
-    medium: 1.5,
-    hard: 2,
+    medium: 2,
+    hard: 3,
     ai: 1, // Base multiplier for AI
     ai_tiers: { // Multiplier increases based on question count
-        1: 1,
-        21: 1.5,
-        41: 2
+        1: 1.5,
+        21: 2.5,
+        41: 3.5
     }
 };
 

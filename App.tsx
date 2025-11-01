@@ -30,6 +30,7 @@ function App() {
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const [questionCount, setQuestionCount] = useState(0);
   const [answerFeedback, setAnswerFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [showWrongAnswerOverlay, setShowWrongAnswerOverlay] = useState(false);
 
   const [lives, setLives] = useState(INITIAL_LIVES);
   const [score, setScore] = useState(0);
@@ -104,6 +105,7 @@ function App() {
     setAnswerFeedback(null);
     setPerformanceStats(initialStats);
     setSplashData(null);
+    setShowWrongAnswerOverlay(false);
     setJustLostLife(false);
     setCurrentMultiplier(1);
     clearTimer();
@@ -201,6 +203,7 @@ function App() {
 
     } else {
       setAnswerFeedback('incorrect');
+      setShowWrongAnswerOverlay(true);
       playIncorrectSound();
       setScore(Math.max(0, score + (POINTS_INCORRECT * multiplier)));
       setStreak(0);
@@ -223,12 +226,13 @@ function App() {
     
     setQuestionCount(prev => prev + 1);
     
-    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 500 : 190);
+    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 500 : 500);
 
     setTimeout(() => {
         const nextQCountForAI = difficulty === 'ai' ? questionCount + 1 : undefined;
         setQuestion(generateQuestion(difficulty, operation, nextQCountForAI));
         setAnswerFeedback(null);
+        setShowWrongAnswerOverlay(false);
     }, delay);
   };
   
@@ -277,6 +281,7 @@ function App() {
             lastBonus={lastBonus}
             onAnswerSubmit={handleAnswer}
             answerFeedback={answerFeedback}
+            showWrongAnswerOverlay={showWrongAnswerOverlay}
             playButtonSound={playButtonPressSound}
             gameMode={gameMode}
             timer={timer}
@@ -312,32 +317,32 @@ function App() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-400 to-indigo-600 min-h-screen text-white flex flex-col items-center justify-center p-4">
+    <div className="bg-gradient-to-br from-indigo-400 to-purple-500 min-h-screen text-white flex flex-col items-center justify-center p-4">
       {splashData && <SplashScreen message={splashData.count ? t(splashData.messageKey).replace('{count}', splashData.count.toString()) : t(splashData.messageKey)} />}
-      <main className="w-full max-w-2xl mx-auto bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl p-6 md:p-10 border border-white/30">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-center mb-6 tracking-wide text-shadow">
+      <main className="w-full max-w-lg mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-8 border border-white/20">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-center mb-4 text-white drop-shadow-lg">
           {t('gameTitle')}
         </h1>
         {renderGameState()}
       </main>
-      <footer className="w-full max-w-2xl mx-auto pt-4 text-center">
+      <footer className="w-full max-w-lg mx-auto pt-4 text-center">
         {gameState === 'playing' && (
              <button onClick={handleExitGame} className="bg-red-500/80 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors">
                 {t('exitGame')}
              </button>
         )}
         {gameState === 'menu' && (
-          <div className="flex justify-center items-center gap-2 md:gap-4 text-sm font-bold">
-            <button onClick={() => handleShowPage('rules')} className="hover:underline">{t('rules')}</button>
-            <span>&bull;</span>
-            <button onClick={() => handleShowPage('about')} className="hover:underline">{t('about')}</button>
-            <span>&bull;</span>
-            <button onClick={() => handleShowPage('privacy')} className="hover:underline">{t('privacy')}</button>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex justify-center items-center gap-2 md:gap-4 text-sm font-semibold text-white/80">
+              <button onClick={() => handleShowPage('rules')} className="hover:underline">{t('rules')}</button>
+              <span>&bull;</span>
+              <button onClick={() => handleShowPage('about')} className="hover:underline">{t('about')}</button>
+              <span>&bull;</span>
+              <button onClick={() => handleShowPage('privacy')} className="hover:underline">{t('privacy')}</button>
+            </div>
+             <LanguageSelector />
           </div>
         )}
-        <div className="mt-2">
-            <LanguageSelector />
-        </div>
       </footer>
     </div>
   );

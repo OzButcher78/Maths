@@ -51,7 +51,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
       <p className="text-6xl md:text-7xl font-black">{score}</p>
       
       <div className="w-full max-w-sm bg-black/20 p-3 rounded-xl">
-        <h3 className="text-xl font-bold mb-2">{t('gameSummary')}</h3>
+        <h3 className="text-base md:text-xl font-bold mb-2">{t('gameSummary')}</h3>
         <div className="flex justify-around text-center">
             {gameMode === 'regular' && (
                 <div>
@@ -86,7 +86,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
             placeholder={t('namePlaceholder')}
           />
           {error && <p className="text-red-300 font-bold">{error}</p>}
-          <button type="submit" disabled={loading} className="w-full py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 disabled:bg-gray-400">
+          <button type="submit" disabled={loading} className="w-full py-3 px-6 text-base md:text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 disabled:bg-gray-400">
             {loading ? t('checking') : t('submitScore')}
           </button>
         </form>

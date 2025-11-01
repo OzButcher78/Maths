@@ -66,63 +66,78 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
 
   if (showLeaderboard) {
     return (
-        <div className="flex flex-col items-center gap-6 animate-fade-in">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
             <Leaderboard scores={leaderboard} />
             <button
                 onClick={handleBackToMenu}
-                className="w-full max-w-xs py-3 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                className="w-full max-w-sm py-3 text-lg font-bold text-white bg-indigo-500 rounded-xl shadow-lg hover:bg-indigo-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300"
             >
                 {t('backToMenu')}
             </button>
         </div>
     );
   }
+  
+  const SelectionButton: React.FC<{onClick: () => void; isSelected: boolean; children: React.ReactNode; className?: string}> = ({ onClick, isSelected, children, className }) => (
+    <button
+      onClick={onClick}
+      className={`w-full py-2.5 px-2 text-base font-bold rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
+      ${isSelected 
+        ? 'bg-white text-purple-700 scale-105 border-white/50' 
+        : 'bg-white/10 text-white hover:bg-white/20 border-white/20'} 
+      ${className}`}
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <div className="flex flex-col items-center gap-6 animate-fade-in">
+    <div className="flex flex-col items-center gap-5 animate-fade-in">
       
       <div className="w-full">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-4">{t('chooseGameMode')}</h2>
-        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3">
+        <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseGameMode')}</h2>
+        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2.5">
           {gameModes.map(m => (
-            <button
+            <SelectionButton
               key={m}
               onClick={() => { playButtonSound(); setSelectedGameMode(m); }}
-              className={`flex flex-row items-center justify-center w-full py-2 sm:py-3 px-2 text-sm sm:text-base font-bold rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-50 text-center
-              ${selectedGameMode === m ? 'bg-yellow-400 text-indigo-800 scale-105 ring-yellow-300' : 'bg-white/30 text-white hover:bg-white/50'}`}
+              isSelected={selectedGameMode === m}
             >
-              <span className="text-lg mr-2">{gameModeIcons[m]}</span>
-              <span>{gameModeDisplay[m]}</span>
-            </button>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-lg">{gameModeIcons[m]}</span>
+                <span>{gameModeDisplay[m]}</span>
+              </div>
+            </SelectionButton>
           ))}
         </div>
       </div>
 
       <div className="w-full">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-4">{t('chooseDifficulty')}</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseDifficulty')}</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {difficulties.map(d => (
-            <button
+            <SelectionButton
               key={d}
               onClick={() => { playButtonSound(); setSelectedDifficulty(d); }}
-              className={`w-full py-3 px-4 text-xl font-bold rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-50
-              ${selectedDifficulty === d ? 'bg-yellow-400 text-indigo-800 scale-105 ring-yellow-300' : 'bg-white/30 text-white hover:bg-white/50'}`}
+              isSelected={selectedDifficulty === d}
             >
               {difficultyDisplay[d]}
-            </button>
+            </SelectionButton>
           ))}
         </div>
       </div>
       
       <div>
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-4">{t('chooseOperation')}</h2>
-        <div className="grid grid-cols-5 gap-3">
+        <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseOperation')}</h2>
+        <div className="grid grid-cols-5 gap-2.5">
           {operations.map(o => (
-            <button
+             <button
               key={o}
               onClick={() => { playButtonSound(); setSelectedOperation(o); }}
-              className={`w-full py-4 text-3xl font-black rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-50
-              ${selectedOperation === o ? 'bg-yellow-400 text-indigo-800 scale-105 ring-yellow-300' : 'bg-white/30 text-white hover:bg-white/50'}`}
+              className={`w-14 h-14 flex items-center justify-center text-3xl font-black rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
+              ${selectedOperation === o 
+                ? 'bg-white text-purple-700 scale-105 border-white/50' 
+                : 'bg-white/10 text-white hover:bg-white/20 border-white/20'}`}
             >
               {operationSymbols[o]}
             </button>
@@ -130,17 +145,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
         </div>
       </div>
 
-      <div className="w-full max-w-xs flex flex-col gap-3">
+      <div className="w-full max-w-xs flex flex-col gap-3 mt-2">
         <button
             onClick={handleStart}
             disabled={!selectedOperation || !selectedDifficulty || !selectedGameMode}
-            className="w-full py-4 text-2xl font-black text-white bg-green-500 rounded-xl shadow-lg hover:bg-green-600 transition-transform duration-200 ease-in-out transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50"
+            className="w-full py-3 text-xl font-bold text-green-900 bg-green-400 rounded-xl shadow-lg hover:bg-green-500 transition-colors duration-200 ease-in-out disabled:bg-slate-500/40 disabled:text-white/60 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-300"
         >
             {t('startGame')}
         </button>
         <button
             onClick={handleShowLeaderboard}
-            className="w-full py-3 text-xl font-bold text-white bg-indigo-500 rounded-xl shadow-lg hover:bg-indigo-600 transition-transform duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+            className="w-full py-3 text-lg font-bold text-white bg-indigo-500 rounded-xl shadow-lg hover:bg-indigo-600 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-indigo-300"
         >
             {t('viewLeaderboard')}
         </button>

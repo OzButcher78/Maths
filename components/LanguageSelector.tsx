@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocalization, supportedLanguages } from '../context/LocalizationContext';
+import ChevronDownIcon from './icons/ChevronDownIcon';
 
 const LanguageSelector: React.FC = () => {
   const { language, setLanguage } = useLocalization();
@@ -9,18 +10,21 @@ const LanguageSelector: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="relative inline-block text-left">
       <select 
         value={language} 
         onChange={handleChange}
-        className="bg-white/20 text-white font-bold py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        className="font-semibold py-2 pl-4 pr-10 rounded-lg text-white bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
       >
         {supportedLanguages.map(lang => (
-          <option key={lang.code} value={lang.code} className="text-black">
+          <option key={lang.code} value={lang.code} className="text-black font-semibold">
             {lang.name}
           </option>
         ))}
       </select>
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-white">
+        <ChevronDownIcon />
+      </div>
     </div>
   );
 };
