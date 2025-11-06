@@ -1,6 +1,7 @@
 import React from 'react';
 import { PerformanceStats, Operation } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
+import BackIcon from './icons/BackIcon';
 
 interface StatsScreenProps {
   stats: PerformanceStats;
@@ -46,7 +47,8 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ stats, onBack }) => {
         })}
       </div>
 
-      <button onClick={onBack} className="w-full max-w-sm mt-4 py-3 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105">
+      <button onClick={onBack} className="w-full max-w-sm mt-4 py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2">
+        <BackIcon />
         {t('back')}
       </button>
     </div>

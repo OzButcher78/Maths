@@ -1,7 +1,11 @@
+
+
 import React, { useState } from 'react';
 import { Difficulty, Operation, ScoreEntry, GameMode } from '../types';
 import Leaderboard from './Leaderboard';
 import { useLocalization } from '../context/LocalizationContext';
+import BackIcon from './icons/BackIcon';
+import PlayIcon from './icons/PlayIcon';
 
 interface MenuScreenProps {
   onStartGame: (operation: Operation, difficulty: Difficulty | null, gameMode: GameMode) => void;
@@ -70,8 +74,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
             <Leaderboard scores={leaderboard} />
             <button
                 onClick={handleBackToMenu}
-                className="w-full max-w-sm py-3 text-lg font-bold text-white bg-indigo-500 rounded-xl shadow-lg hover:bg-indigo-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                className="w-full max-w-sm py-3 text-lg font-bold text-white bg-green-500 rounded-xl shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center gap-2"
             >
+                <BackIcon />
                 {t('backToMenu')}
             </button>
         </div>
@@ -153,13 +158,14 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
         <button
             onClick={handleStart}
             disabled={isStartDisabled}
-            className="w-full py-3 text-xl font-bold text-green-900 bg-green-400 rounded-xl shadow-lg hover:bg-green-500 transition-colors duration-200 ease-in-out disabled:bg-slate-500/40 disabled:text-white/60 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-300"
+            className="w-full py-3 text-xl font-bold text-green-900 bg-green-400 rounded-xl shadow-lg hover:bg-green-500 transition-colors duration-200 ease-in-out disabled:bg-slate-500/40 disabled:text-white/60 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center gap-2"
         >
             {t('startGame')}
+            <PlayIcon />
         </button>
         <button
             onClick={handleShowLeaderboard}
-            className="w-full py-3 text-lg font-bold text-white bg-indigo-500 rounded-xl shadow-lg hover:bg-indigo-600 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-indigo-300"
+            className="w-full py-2.5 text-base font-bold text-white bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-yellow-300 transform hover:scale-105"
         >
             {t('viewLeaderboard')}
         </button>

@@ -8,12 +8,14 @@ import { useLocalization } from '../context/LocalizationContext';
 import { INITIAL_LIVES } from '../constants';
 import TickIcon from './icons/TickIcon';
 import CrossIcon from './icons/CrossIcon';
+import StreakIndicator from './StreakIndicator';
 
 interface GameScreenProps {
   question: Question;
   score: number;
   lives: number;
-  lastBonus: string | null;
+  streak: number;
+  isBonusActive: boolean;
   onAnswerSubmit: (answer: number) => void;
   answerFeedback: 'correct' | 'incorrect' | null;
   showWrongAnswerOverlay: boolean;
@@ -24,16 +26,17 @@ interface GameScreenProps {
   multiplier: number;
   correctTally: number;
   incorrectTally: number;
+  playTickSound: () => void;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, lastBonus, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, correctTally, incorrectTally }) => {
+const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, isBonusActive, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, correctTally, incorrectTally, playTickSound }) => {
   const [answer, setAnswer] = useState('');
   const { t } = useLocalization();
 
   useEffect(() => {
     setAnswer('');
   }, [question]);
-  
+
   const handleSubmit = () => {
     if (answer === '') return;
     const userAnswer = parseInt(answer, 10);
@@ -51,6 +54,33 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, lastBon
   const handleBackspaceClick = () => {
       setAnswer(a => a.slice(0, -1));
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.repeat) return; // Ignore repeated events from holding key down
+
+        if (event.key >= '0' && event.key <= '9') {
+            playButtonSound();
+            handleDigitClick(event.key);
+        } else if (event.key === 'Backspace') {
+            playButtonSound();
+            handleBackspaceClick();
+        } else if (event.key === 'Enter') {
+            playButtonSound();
+            handleSubmit();
+        }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [answer, onAnswerSubmit, playButtonSound]);
+
+  useEffect(() => {
+    if (gameMode === 'timeAttack' && timer > 0 && timer <= 10) {
+      playTickSound();
+    }
+  }, [timer, gameMode, playTickSound]);
 
 
   return (
@@ -75,7 +105,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, lastBon
           )}
         </div>
         {gameMode === 'timeAttack' && (
-            <div className="flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full text-xl md:text-2xl font-bold">
+            <div className={`flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full text-xl md:text-2xl font-bold transition-all ${timer <= 10 && timer > 0 ? 'animate-flash-red' : ''}`}>
                 <span>⏱️</span>
                 <span>{timer}</span>
             </div>
@@ -108,14 +138,27 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, lastBon
         playButtonSound={playButtonSound}
       />
 
-      <div className="w-full flex justify-center gap-8 mt-2 text-xl font-bold">
-        <div className="flex items-center gap-2 text-green-300">
-          <TickIcon className="w-6 h-6" />
-          <span>{correctTally}</span>
-        </div>
-        <div className="flex items-center gap-2 text-red-300">
-          <CrossIcon className="w-6 h-6" />
-          <span>{incorrectTally}</span>
+      <div className="w-full max-w-xs flex justify-between items-center mt-4 h-12 px-2">
+        <StreakIndicator streak={streak} isBonusActive={isBonusActive} />
+        <div className="flex items-center bg-black/20 rounded-full overflow-hidden shadow-inner border border-white/10">
+            <div 
+                className="flex items-center justify-center gap-1.5 px-3 py-1 bg-green-500/50" 
+                title={`${correctTally} ${t('correct')}`}
+            >
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="font-bold text-base text-white">{correctTally}</span>
+            </div>
+            <div 
+                className="flex items-center justify-center gap-1.5 px-3 py-1 bg-red-500/50" 
+                title={`${incorrectTally} ${t('incorrect')}`}
+            >
+                <span className="font-bold text-base text-white">{incorrectTally}</span>
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
         </div>
       </div>
 
@@ -130,7 +173,6 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, lastBon
                 <CrossIcon />
             </div>
         )}
-        {lastBonus && <span className="text-xl font-bold text-yellow-300 block animate-ping-once">{lastBonus}</span>}
       </div>
     </div>
   );

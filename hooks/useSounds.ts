@@ -117,7 +117,31 @@ const useSounds = () => {
     ]);
   }, [playSound]);
 
-  return { playCorrectSound, playIncorrectSound, playStreakSound, playGameOverSound, playButtonPressSound, playSplashScreenSound, unlockAudio };
+  // A quick rising sound for multiplier increase
+  const playMultiplierSound = useCallback(() => {
+    playSound([
+      { freq: NOTE_FREQ.E5, start: 0, duration: 0.08, type: 'triangle', vol: 0.2 },
+      { freq: NOTE_FREQ.A4, start: 0.08, duration: 0.12, type: 'triangle', vol: 0.25 },
+    ]);
+  }, [playSound]);
+
+  // A pleasant sound for hitting a 10-question milestone
+  const playMilestoneSound = useCallback(() => {
+    playSound([
+        { freq: NOTE_FREQ.G4, start: 0, duration: 0.1, vol: 0.3 },
+        { freq: NOTE_FREQ.C5, start: 0.1, duration: 0.1, vol: 0.3 },
+        { freq: NOTE_FREQ.E5, start: 0.2, duration: 0.2, vol: 0.4 },
+    ]);
+  }, [playSound]);
+
+  // A short, sharp tick for the timer countdown
+  const playTickSound = useCallback(() => {
+    playSound([
+        { freq: NOTE_FREQ.C6, start: 0, duration: 0.05, type: 'triangle', vol: 0.2 }
+    ]);
+  }, [playSound]);
+
+  return { playCorrectSound, playIncorrectSound, playStreakSound, playGameOverSound, playButtonPressSound, playSplashScreenSound, unlockAudio, playMultiplierSound, playMilestoneSound, playTickSound };
 };
 
 export default useSounds;

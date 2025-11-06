@@ -44,6 +44,15 @@
       .animate-flash {
         animation: flash 0.5s linear 4; /* Total duration 2 seconds */
       }
+      @keyframes flash-red {
+        50% { 
+          color: #ef4444; /* red-500 */
+          transform: scale(1.1);
+        }
+      }
+      .animate-flash-red {
+        animation: flash-red 1s step-end infinite;
+      }
       select {
         -webkit-appearance: none;
         -moz-appearance: none;

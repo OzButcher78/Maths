@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats, MultiplicationTableOption } from './types';
 import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, SPLASH_MESSAGES, SCORE_MULTIPLIERS, MULTIPLICATION_ROW_POINTS, MULTIPLICATION_ROW_SCORES } from './constants';
@@ -39,7 +41,7 @@ function App() {
   const [streak, setStreak] = useState(0);
   const [question, setQuestion] = useState<Question | null>(null);
   const [leaderboard, setLeaderboard] = useState<ScoreEntry[]>([]);
-  const [lastBonus, setLastBonus] = useState<string | null>(null);
+  const [isBonusActive, setIsBonusActive] = useState(false);
   const [timer, setTimer] = useState(0);
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats>(initialStats);
   const [splashData, setSplashData] = useState<{ messageKey: string; count?: number } | null>(null);
@@ -52,7 +54,7 @@ function App() {
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { t } = useLocalization();
-  const { playCorrectSound, playIncorrectSound, playStreakSound, playGameOverSound, playButtonPressSound, playSplashScreenSound, unlockAudio } = useSounds();
+  const { playCorrectSound, playIncorrectSound, playStreakSound, playGameOverSound, playButtonPressSound, playSplashScreenSound, unlockAudio, playMultiplierSound, playMilestoneSound, playTickSound } = useSounds();
 
   useEffect(() => {
     try {
@@ -105,7 +107,7 @@ function App() {
     setLives(INITIAL_LIVES);
     setScore(0);
     setStreak(0);
-    setLastBonus(null);
+    setIsBonusActive(false);
     setQuestionCount(0);
     setAnswerFeedback(null);
     setPerformanceStats(initialStats);
@@ -170,7 +172,6 @@ function App() {
   const handleAnswer = (userAnswer: number) => {
     if (!question || !operation || !gameMode) return;
     
-    setLastBonus(null);
     const isCorrect = userAnswer === question.answer;
 
     setPerformanceStats(prevStats => {
@@ -187,11 +188,18 @@ function App() {
     let multiplier = currentMultiplier;
     if(difficulty === 'ai') {
         const tiers = Object.keys(SCORE_MULTIPLIERS.ai_tiers).map(Number).sort((a,b) => a-b);
+        let newMultiplier = 1;
         for(const tier of tiers) {
             if(questionCount >= tier) {
-                multiplier = SCORE_MULTIPLIERS.ai_tiers[tier];
+                newMultiplier = SCORE_MULTIPLIERS.ai_tiers[tier];
             }
         }
+
+        if (newMultiplier !== currentMultiplier) {
+            playMultiplierSound();
+        }
+
+        multiplier = newMultiplier;
         setCurrentMultiplier(multiplier);
     }
 
@@ -199,14 +207,19 @@ function App() {
     if (isCorrect) {
       setAnswerFeedback('correct');
       playCorrectSound();
+      if (gameMode === 'timeAttack') {
+        setTimer(prev => prev + 2);
+      }
       const newStreak = streak + 1;
       let bonusPoints = 0;
       const streakBonus = STREAK_BONUSES.find(b => b.streak === newStreak);
+      const maxStreak = STREAK_BONUSES.length > 0 ? Math.max(...STREAK_BONUSES.map(b => b.streak)) : 0;
       
       if (streakBonus) {
           playStreakSound();
           bonusPoints = streakBonus.bonus;
-          setLastBonus(`+${bonusPoints} ${t('streakBonus')}`);
+          setIsBonusActive(true);
+          setTimeout(() => setIsBonusActive(false), 1000);
       }
 
       let pointsToAdd = 0;
@@ -225,9 +238,14 @@ function App() {
       }
 
       setScore(score + pointsToAdd);
-      setStreak(newStreak);
+
+      if (maxStreak > 0 && newStreak >= maxStreak) {
+        setStreak(0);
+      } else {
+        setStreak(newStreak);
+      }
       
-      const isStreakMilestone = newStreak === 5 || newStreak === 10 || newStreak === 15;
+      const isStreakMilestone = !!streakBonus;
       const isProgressMilestone = (questionCount + 1) % 10 === 0 && (questionCount + 1) > 0;
       
       if (isStreakMilestone) {
@@ -235,8 +253,9 @@ function App() {
         splashScreenWillShow = true;
       } else if (isProgressMilestone) {
         // Prevent showing progress splash if a streak splash is imminent on the next question.
-        const willHitStreakMilestoneNext = (newStreak + 1) === 5 || (newStreak + 1) === 10 || (newStreak + 1) === 15;
+        const willHitStreakMilestoneNext = STREAK_BONUSES.some(b => b.streak === newStreak + 1);
         if (!willHitStreakMilestoneNext) {
+          playMilestoneSound();
           showSplashScreen(SPLASH_MESSAGES.progress, questionCount + 1);
           splashScreenWillShow = true;
         }
@@ -249,6 +268,10 @@ function App() {
       setScore(Math.max(0, score + (POINTS_INCORRECT * (operation === 'multiplication' && difficulty === null ? 1 : multiplier))));
       setStreak(0);
       
+      if (gameMode === 'timeAttack') {
+        setTimer(prev => Math.max(0, prev - 2));
+      }
+
       if (gameMode === 'regular') {
         const newLives = lives - 1;
         setLives(newLives);
@@ -330,7 +353,8 @@ function App() {
             question={question}
             score={score}
             lives={lives}
-            lastBonus={lastBonus}
+            streak={streak}
+            isBonusActive={isBonusActive}
             onAnswerSubmit={handleAnswer}
             answerFeedback={answerFeedback}
             showWrongAnswerOverlay={showWrongAnswerOverlay}
@@ -341,6 +365,7 @@ function App() {
             multiplier={currentMultiplier}
             correctTally={totalCorrect}
             incorrectTally={totalIncorrect}
+            playTickSound={playTickSound}
           />
         );
       }
@@ -381,7 +406,7 @@ function App() {
       <div className="w-full max-w-lg mx-auto sm:p-8 bg-white/10 backdrop-blur-xl sm:rounded-3xl sm:shadow-2xl sm:border sm:border-white/20 flex flex-col justify-between min-h-screen sm:min-h-0 sm:h-auto">
         <div className="p-4 flex flex-col flex-grow justify-between">
             <div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-center mb-4 text-white drop-shadow-lg">
+                <h1 className="text-4xl sm:text-5xl md:text-5xl font-black text-center mb-4 text-white drop-shadow-lg">
                 {t('gameTitle')}
                 </h1>
                 <div className="flex-grow flex flex-col justify-center">

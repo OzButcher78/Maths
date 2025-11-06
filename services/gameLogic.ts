@@ -45,48 +45,28 @@ export const generateQuestion = (difficulty: Difficulty | null, operation: Opera
 
     switch (currentOperation) {
       case 'addition':
-        num1 = randomNumber(r.add[0], r.add[1]);
-        num2 = randomNumber(r.add[0], r.add[1]);
+        if (difficulty === 'medium') {
+            num1 = randomNumber(10, 99);
+            num2 = randomNumber(1, 9);
+        } else {
+            num1 = randomNumber(r.add[0], r.add[1]);
+            num2 = randomNumber(r.add[0], r.add[1]);
+        }
         answer = num1 + num2;
         newQuestion = { num1, num2, operation: 'addition', operator: '+', answer };
         break;
       
       case 'subtraction':
         if (difficulty === 'medium') {
-            // New rules for medium subtraction: AB - C
-            const requiresBorrow = Math.random() < 0.3; // 30% chance for a borrow question
-
-            if (requiresBorrow) {
-                // Light borrow: C is small (<= 4) and B < C
-                const C = randomNumber(2, 4); // num2
-                const B = randomNumber(0, C - 1); // ones digit of num1 (B) must be smaller than C
-                
-                // Generate a tens digit for 10s-50s, or handle 60 specially if B is 0.
-                let T;
-                if (B === 0) {
-                    T = randomNumber(1, 6); // Allows for 10, 20, 30, 40, 50, 60
-                } else {
-                    T = randomNumber(1, 5); // Allows for 1B, 2B, ... 5B
-                }
-                num1 = T * 10 + B;
-                num2 = C;
-            } else {
-                // No borrow: B >= C
-                const C = randomNumber(1, 9); // num2
-                const B = randomNumber(C, 9); // ones digit of num1 (B) must be >= C
-                const T = randomNumber(1, 5); // Tens digit for 10s-50s. 60 isn't possible here as B would be 0.
-                num1 = T * 10 + B;
-                num2 = C;
-            }
-            answer = num1 - num2;
-            newQuestion = { num1, num2, operation: 'subtraction', operator: '-', answer };
+            num1 = randomNumber(10, 99);
+            num2 = randomNumber(1, 9);
         } else {
             // Existing logic for easy, hard, and AI difficulties
             num1 = randomNumber(r.sub[0], r.sub[1]);
             num2 = randomNumber(r.sub[0], num1); // Ensure num2 is not greater than num1
-            answer = num1 - num2;
-            newQuestion = { num1, num2, operation: 'subtraction', operator: '-', answer };
         }
+        answer = num1 - num2;
+        newQuestion = { num1, num2, operation: 'subtraction', operator: '-', answer };
         break;
 
       case 'multiplication':

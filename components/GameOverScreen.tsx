@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ScoreEntry, Difficulty, GameMode, PerformanceStats, Operation } from '../types';
 import Leaderboard from './Leaderboard';
 import { useLocalization } from '../context/LocalizationContext';
+import PlayIcon from './icons/PlayIcon';
+import ThumbsUpIcon from './icons/ThumbsUpIcon';
 
 interface GameOverScreenProps {
   score: number;
@@ -86,8 +88,13 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
             placeholder={t('namePlaceholder')}
           />
           {error && <p className="text-red-300 font-bold">{error}</p>}
-          <button type="submit" disabled={loading} className="w-full py-3 px-6 text-base md:text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 disabled:bg-gray-400">
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full py-3 px-6 text-base md:text-xl font-bold text-white bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-yellow-300 transform hover:scale-105 disabled:bg-gray-400 flex items-center justify-center gap-2"
+          >
             {loading ? t('checking') : t('submitScore')}
+            <ThumbsUpIcon />
           </button>
         </form>
       ) : (
@@ -99,8 +106,9 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
       </div>
 
       <div className="w-full max-w-sm mt-4 flex flex-col gap-3">
-        <button onClick={onPlayAgain} className="py-3 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105">
+        <button onClick={onPlayAgain} className="flex items-center justify-center gap-2 py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
           {t('playAgain')}
+          <PlayIcon />
         </button>
         {difficulty === 'ai' && (
             <button onClick={onShowStats} className="py-3 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-lg hover:bg-purple-600 transition-transform transform hover:scale-105">
