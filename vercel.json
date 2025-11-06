@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    { "source": "/locales/(.*)", "destination": "/locales/$1" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/(.*)", "destination": "/" }
+  ],
+  "headers": [
+    {
+      "source": "/locales/(.*).json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ]
+}
