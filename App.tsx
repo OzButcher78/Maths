@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats, MultiplicationTableOption } from './types';
 import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, SPLASH_MESSAGES, SCORE_MULTIPLIERS, MULTIPLICATION_ROW_POINTS, MULTIPLICATION_ROW_SCORES } from './constants';
@@ -12,6 +11,8 @@ import StatsScreen from './components/StatsScreen';
 import RulesPage from './components/RulesPage';
 import AboutPage from './components/AboutPage';
 import PrivacyPage from './components/PrivacyPage';
+import ImpressumPage from './components/ImpressumPage';
+import TermsPage from './components/TermsPage';
 import LanguageSelector from './components/LanguageSelector';
 import SplashScreen from './components/SplashScreen';
 import MultiplicationSetupScreen from './components/MultiplicationSetupScreen';
@@ -50,11 +51,27 @@ function App() {
   
   const [pendingGameMode, setPendingGameMode] = useState<GameMode | null>(null);
   const [multiplicationTable, setMultiplicationTable] = useState<MultiplicationTableOption | null>(null);
+  const [selectedTimeDuration, setSelectedTimeDuration] = useState<number>(TIME_ATTACK_DURATION);
 
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { t } = useLocalization();
-  const { playCorrectSound, playIncorrectSound, playStreakSound, playGameOverSound, playButtonPressSound, playSplashScreenSound, unlockAudio, playMultiplierSound, playMilestoneSound, playTickSound } = useSounds();
+  const { 
+    playCorrectSound, 
+    playIncorrectSound, 
+    playStreak3Sound, 
+    playStreak6Sound, 
+    playStreak10Sound, 
+    playStreak15Sound, 
+    playStreak20Sound,
+    playGameOverSound, 
+    playButtonPressSound, 
+    playSplashScreenSound, 
+    unlockAudio, 
+    playMultiplierSound, 
+    playMilestoneSound, 
+    playTickSound 
+  } = useSounds();
 
   useEffect(() => {
     try {
@@ -91,6 +108,24 @@ function App() {
     }
     return () => clearTimer();
   }, [gameState, gameMode, playGameOverSound]);
+  
+  const showSplashScreen = useCallback((messages: string[], count?: number) => {
+    const messageKey = messages[Math.floor(Math.random() * messages.length)];
+    setSplashData({ messageKey, count });
+    playSplashScreenSound();
+    setTimeout(() => setSplashData(null), 1500);
+  }, [playSplashScreenSound]);
+
+  // Minute Bonus Logic for Time Attack
+  useEffect(() => {
+    if (gameState === 'playing' && gameMode === 'timeAttack' && selectedTimeDuration > 60) {
+        if (timer > 0 && timer < selectedTimeDuration && timer % 60 === 0) {
+            setScore(prev => prev + 20);
+            playMilestoneSound();
+            showSplashScreen(['minuteBonus']);
+        }
+    }
+  }, [timer, gameState, gameMode, selectedTimeDuration, playMilestoneSound, showSplashScreen]);
 
 
   const saveLeaderboard = (newLeaderboard: ScoreEntry[]) => {
@@ -119,13 +154,14 @@ function App() {
     clearTimer();
   }, []);
 
-  const startGame = useCallback((selectedDifficulty: Difficulty | null, selectedOperation: Operation, selectedGameMode: GameMode, selectedMultiplicationTable: MultiplicationTableOption | null) => {
+  const startGame = useCallback((selectedDifficulty: Difficulty | null, selectedOperation: Operation, selectedGameMode: GameMode, selectedMultiplicationTable: MultiplicationTableOption | null, duration: number = TIME_ATTACK_DURATION) => {
     unlockAudio();
     resetGame();
     setDifficulty(selectedDifficulty);
     setOperation(selectedOperation);
     setGameMode(selectedGameMode);
     setMultiplicationTable(selectedMultiplicationTable);
+    setSelectedTimeDuration(duration);
     
     if (selectedDifficulty) {
       const initialMultiplier = SCORE_MULTIPLIERS[selectedDifficulty] || 1;
@@ -138,35 +174,29 @@ function App() {
     const firstQuestionCount = isAiMode ? 1 : 0;
     setQuestionCount(1);
     
-    if (selectedGameMode === 'timeAttack') setTimer(TIME_ATTACK_DURATION);
+    if (selectedGameMode === 'timeAttack') setTimer(duration);
 
     setQuestion(generateQuestion(selectedDifficulty, selectedOperation, firstQuestionCount, selectedMultiplicationTable, null));
 
     setGameState('playing');
   }, [resetGame, unlockAudio]);
 
-  const handleGameSelection = (selectedOperation: Operation, selectedDifficulty: Difficulty | null, selectedGameMode: GameMode) => {
+  const handleGameSelection = (selectedOperation: Operation, selectedDifficulty: Difficulty | null, selectedGameMode: GameMode, duration?: number) => {
     playButtonPressSound();
     if (selectedOperation === 'multiplication') {
         setPendingGameMode(selectedGameMode);
+        setSelectedTimeDuration(duration || TIME_ATTACK_DURATION);
         setGameState('multiplicationSetup');
     } else if (selectedDifficulty) {
-        startGame(selectedDifficulty, selectedOperation, selectedGameMode, null);
+        startGame(selectedDifficulty, selectedOperation, selectedGameMode, null, duration);
     }
   };
 
   const handleStartMultiplicationGame = (tables: MultiplicationTableOption) => {
     if (pendingGameMode) {
-       startGame(null, 'multiplication', pendingGameMode, tables);
+       startGame(null, 'multiplication', pendingGameMode, tables, selectedTimeDuration);
        setPendingGameMode(null);
     }
-  };
-
-  const showSplashScreen = (messages: string[], count?: number) => {
-    const messageKey = messages[Math.floor(Math.random() * messages.length)];
-    setSplashData({ messageKey, count });
-    playSplashScreenSound();
-    setTimeout(() => setSplashData(null), 1500);
   };
 
   const handleAnswer = (userAnswer: number) => {
@@ -184,6 +214,7 @@ function App() {
     });
     
     let splashScreenWillShow = false;
+    let isGameOver = false;
     
     let multiplier = currentMultiplier;
     if(difficulty === 'ai') {
@@ -207,16 +238,20 @@ function App() {
     if (isCorrect) {
       setAnswerFeedback('correct');
       playCorrectSound();
-      if (gameMode === 'timeAttack') {
-        setTimer(prev => prev + 2);
-      }
+
       const newStreak = streak + 1;
       let bonusPoints = 0;
       const streakBonus = STREAK_BONUSES.find(b => b.streak === newStreak);
       const maxStreak = STREAK_BONUSES.length > 0 ? Math.max(...STREAK_BONUSES.map(b => b.streak)) : 0;
       
       if (streakBonus) {
-          playStreakSound();
+          if (newStreak === 3) playStreak3Sound();
+          else if (newStreak === 6) playStreak6Sound();
+          else if (newStreak === 10) playStreak10Sound();
+          else if (newStreak === 15) playStreak15Sound();
+          else if (newStreak === 20) playStreak20Sound();
+          else playStreak3Sound();
+          
           bonusPoints = streakBonus.bonus;
           setIsBonusActive(true);
           setTimeout(() => setIsBonusActive(false), 1000);
@@ -224,7 +259,7 @@ function App() {
 
       let pointsToAdd = 0;
       if (operation === 'multiplication' && difficulty === null) {
-        let basePoints = 1; // Default points
+        let basePoints = 1; 
         if (MULTIPLICATION_ROW_POINTS.easy.includes(question.num1)) {
           basePoints = MULTIPLICATION_ROW_SCORES.easy;
         } else if (MULTIPLICATION_ROW_POINTS.medium.includes(question.num1)) {
@@ -252,7 +287,6 @@ function App() {
         showSplashScreen(SPLASH_MESSAGES.streak);
         splashScreenWillShow = true;
       } else if (isProgressMilestone) {
-        // Prevent showing progress splash if a streak splash is imminent on the next question.
         const willHitStreakMilestoneNext = STREAK_BONUSES.some(b => b.streak === newStreak + 1);
         if (!willHitStreakMilestoneNext) {
           playMilestoneSound();
@@ -268,32 +302,32 @@ function App() {
       setScore(Math.max(0, score + (POINTS_INCORRECT * (operation === 'multiplication' && difficulty === null ? 1 : multiplier))));
       setStreak(0);
       
-      if (gameMode === 'timeAttack') {
-        setTimer(prev => Math.max(0, prev - 2));
-      }
-
       if (gameMode === 'regular') {
         const newLives = lives - 1;
         setLives(newLives);
         setJustLostLife(true);
         setTimeout(() => setJustLostLife(false), 2000);
         if (newLives <= 0) {
-            playGameOverSound();
-            setGameState('gameOver');
-            return;
+            isGameOver = true;
         }
       }
     }
     
     setQuestionCount(prev => prev + 1);
     
-    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 500 : 500);
+    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 500 : 2000);
 
     setTimeout(() => {
-        const nextQCountForAI = difficulty === 'ai' ? questionCount + 1 : undefined;
-        setQuestion(generateQuestion(difficulty, question.operation as Operation, nextQCountForAI, multiplicationTable, question));
-        setAnswerFeedback(null);
-        setShowWrongAnswerOverlay(false);
+        if (isGameOver) {
+            setGameState('gameOver');
+            setShowWrongAnswerOverlay(false);
+        } else {
+            if (lives > 0 || gameMode === 'timeAttack') {
+                setQuestion(generateQuestion(difficulty, operation, difficulty === 'ai' ? questionCount + 1 : undefined, multiplicationTable, question));
+            }
+            setAnswerFeedback(null);
+            setShowWrongAnswerOverlay(false);
+        }
     }, delay);
   };
   
@@ -303,7 +337,7 @@ function App() {
     const inappropriate = await isNameInappropriate(name);
     if (inappropriate) return t('nameInappropriateError');
     
-    const currentDifficulty = difficulty || 'hard'; // Default for leaderboard if multiplication
+    const currentDifficulty = difficulty || 'hard';
     const currentOperation = operation || 'random';
 
     const newEntry: ScoreEntry = { name, score, difficulty: currentDifficulty, operation: currentOperation, gameMode };
@@ -392,6 +426,10 @@ function App() {
         return <AboutPage onBack={handlePlayAgain} />;
       case 'privacy':
         return <PrivacyPage onBack={handlePlayAgain} />;
+      case 'impressum':
+        return <ImpressumPage onBack={handlePlayAgain} />;
+      case 'terms':
+        return <TermsPage onBack={handlePlayAgain} />;
       case 'multiplicationSetup':
         return <MultiplicationSetupScreen onStart={handleStartMultiplicationGame} onBack={handleBackToMenuFromSetup} playButtonSound={playButtonPressSound} />;
       case 'menu':
@@ -413,7 +451,7 @@ function App() {
                     {renderGameState()}
                 </div>
             </div>
-            <footer className="pt-4 text-center">
+            <footer className="pt-6 pb-2 text-center">
             {gameState === 'playing' && (
                 <button onClick={handleExitGame} className="bg-red-500/80 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors">
                     {t('exitGame')}
@@ -421,16 +459,26 @@ function App() {
             )}
             {gameState === 'menu' && (
                 <div className="flex flex-col items-center gap-3">
-                <div className="flex justify-center items-center gap-2 md:gap-4 text-sm font-semibold text-white/80">
-                    <button onClick={() => handleShowPage('rules')} className="hover:underline">{t('rules')}</button>
-                    <span>&bull;</span>
-                    <button onClick={() => handleShowPage('scoring')} className="hover:underline">{t('scoring')}</button>
-                    <span>&bull;</span>
-                    <button onClick={() => handleShowPage('about')} className="hover:underline">{t('about')}</button>
-                    <span>&bull;</span>
-                    <button onClick={() => handleShowPage('privacy')} className="hover:underline">{t('privacy')}</button>
-                </div>
-                <LanguageSelector />
+                    <div className="flex justify-center items-center gap-4 text-sm font-bold text-white/90">
+                        <button onClick={() => handleShowPage('rules')} className="hover:text-yellow-300 transition-colors">{t('rules')}</button>
+                        <span>•</span>
+                        <button onClick={() => handleShowPage('scoring')} className="hover:text-yellow-300 transition-colors">{t('scoring')}</button>
+                        <span>•</span>
+                        <button onClick={() => handleShowPage('about')} className="hover:text-yellow-300 transition-colors">{t('about')}</button>
+                    </div>
+                    
+                    <div className="text-xs text-white/60 px-4 flex flex-col items-center gap-1.5 mt-1">
+                        <span className="opacity-90">© 2025 Dieter Balmer</span>
+                        <div className="flex flex-wrap justify-center items-center gap-x-2">
+                             <button onClick={() => handleShowPage('impressum')} className="hover:text-white hover:underline">{t('impressum')}</button>
+                             <span>|</span>
+                             <button onClick={() => handleShowPage('privacy')} className="hover:text-white hover:underline">{t('privacy')}</button>
+                             <span>|</span>
+                             <button onClick={() => handleShowPage('terms')} className="hover:text-white hover:underline">{t('terms')}</button>
+                        </div>
+                    </div>
+                    
+                    <LanguageSelector />
                 </div>
             )}
             </footer>

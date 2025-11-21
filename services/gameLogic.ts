@@ -7,11 +7,19 @@ const randomNumber = (min: number, max: number): number => {
 export const generateQuestion = (difficulty: Difficulty | null, operation: Operation, questionCount?: number, multiplicationTable?: MultiplicationTableOption | null, previousQuestion?: Question | null): Question => {
   let newQuestion: Question;
   
+  // Safety break to prevent infinite loops in rare cases
+  let attempts = 0;
+  const MAX_ATTEMPTS = 10;
+
   do {
+    attempts++;
     let currentOperation = operation;
+    
     if (operation === 'random') {
       const availableOps: ('addition' | 'subtraction' | 'multiplication' | 'division')[] = ['addition', 'subtraction', 'multiplication', 'division'];
-      currentOperation = availableOps[Math.floor(Math.random() * availableOps.length)];
+      // Use a simple yet effective way to pick a random operation
+      const randomIndex = Math.floor(Math.random() * availableOps.length);
+      currentOperation = availableOps[randomIndex];
     }
 
     let num1: number, num2: number, answer: number;
@@ -119,6 +127,7 @@ export const generateQuestion = (difficulty: Difficulty | null, operation: Opera
           break;
     }
   } while (
+    attempts < MAX_ATTEMPTS &&
     previousQuestion &&
     newQuestion.num1 === previousQuestion.num1 &&
     newQuestion.num2 === previousQuestion.num2 &&

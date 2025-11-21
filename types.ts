@@ -1,6 +1,7 @@
+
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'ai';
 export type Operation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'random';
-export type GameState = 'menu' | 'playing' | 'gameOver' | 'stats' | 'rules' | 'about' | 'privacy' | 'multiplicationSetup' | 'scoring';
+export type GameState = 'menu' | 'playing' | 'gameOver' | 'stats' | 'rules' | 'about' | 'privacy' | 'impressum' | 'terms' | 'multiplicationSetup' | 'scoring';
 export type GameMode = 'regular' | 'timeAttack';
 
 export type MultiplicationTableOption = number[];

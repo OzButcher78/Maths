@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import BackIcon from './icons/BackIcon';
@@ -16,10 +17,21 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack }) => {
       <div className="w-full bg-black/20 p-6 rounded-xl space-y-4 text-center">
         <p className="text-lg text-white/90">{t('aboutAppDescription')}</p>
         <p className="text-2xl font-bold text-yellow-200 mt-4">{t('builtWithLove')}</p>
-        <div className="pt-4 text-sm text-white/70">
-            <p>{t('version')}</p>
-            <p>{t('author')}</p>
+        <div className="pt-4 text-sm text-white/70 flex flex-col gap-1">
+            <p className="font-bold">{t('version')}</p>
             <p>{t('copyright')}</p>
+            
+            <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="font-bold mb-2 text-white/90">{t('changelogTitle')}</p>
+                <ul className="text-xs space-y-1.5 text-white/80 list-none">
+                    <li>• {t('changelog1')}</li>
+                    <li>• {t('changelog2')}</li>
+                    <li>• {t('changelog3')}</li>
+                    <li>• {t('changelog4')}</li>
+                    <li>• {t('changelog5')}</li>
+                </ul>
+                <p className="text-yellow-100/90 mt-3 text-xs">{t('credits')}</p>
+            </div>
         </div>
       </div>
 

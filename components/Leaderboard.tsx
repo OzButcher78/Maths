@@ -14,7 +14,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ scores }) => {
     subtraction: '-',
     multiplication: 'x',
     division: '÷',
-    random: '?',
+    random: 'MIX',
   };
 
   const gameModeDisplay: Record<GameMode, string> = {
@@ -69,7 +69,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ scores }) => {
                     </span>
                  )}
                  <span title={gameModeTitle[entry.gameMode]} className="bg-white/20 px-2 py-0.5 rounded-full text-base">{gameModeDisplay[entry.gameMode]}</span>
-                 <span className="bg-white/20 px-2 py-0.5 rounded-full text-lg font-black">{operationSymbols[entry.operation]}</span>
+                 <span className={`bg-white/20 px-2 py-0.5 rounded-full font-black ${entry.operation === 'random' ? 'text-xs' : 'text-lg'}`}>{operationSymbols[entry.operation]}</span>
                  <span className="font-black text-xl text-yellow-300 w-12 text-right hidden sm:inline">{entry.score}</span>
               </div>
             </li>

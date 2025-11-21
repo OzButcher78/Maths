@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Difficulty, Operation, ScoreEntry, GameMode } from '../types';
 import Leaderboard from './Leaderboard';
@@ -8,7 +6,7 @@ import BackIcon from './icons/BackIcon';
 import PlayIcon from './icons/PlayIcon';
 
 interface MenuScreenProps {
-  onStartGame: (operation: Operation, difficulty: Difficulty | null, gameMode: GameMode) => void;
+  onStartGame: (operation: Operation, difficulty: Difficulty | null, gameMode: GameMode, duration?: number) => void;
   playButtonSound: () => void;
   leaderboard: ScoreEntry[];
 }
@@ -16,13 +14,14 @@ interface MenuScreenProps {
 const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'ai'];
 const operations: Operation[] = ['addition', 'subtraction', 'multiplication', 'division', 'random'];
 const gameModes: GameMode[] = ['regular', 'timeAttack'];
+const timeOptions = [60, 300, 600];
 
 const operationSymbols = {
     addition: '+',
     subtraction: '-',
     multiplication: 'x',
     division: '÷',
-    random: '?',
+    random: 'MIX',
 };
 
 const gameModeIcons: Record<GameMode, string> = {
@@ -34,14 +33,15 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
   const [selectedGameMode, setSelectedGameMode] = useState<GameMode | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number>(60);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const { t } = useLocalization();
 
   const handleStart = () => {
     playButtonSound();
     if (selectedOperation && selectedGameMode) {
-      if (selectedOperation === 'multiplication' || selectedDifficulty) {
-        onStartGame(selectedOperation, selectedDifficulty, selectedGameMode);
+      if (selectedOperation === 'multiplication' || selectedDifficulty || selectedGameMode === 'timeAttack') {
+        onStartGame(selectedOperation, selectedDifficulty, selectedGameMode, selectedDuration);
       }
     }
   };
@@ -66,6 +66,11 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
   const gameModeDisplay = {
     regular: t('regular'),
     timeAttack: t('timeAttack'),
+  };
+
+  const formatDuration = (seconds: number) => {
+      if (seconds <= 60) return `${seconds}s`;
+      return `${seconds / 60} ${t('min')}`;
   };
 
   if (showLeaderboard) {
@@ -108,7 +113,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
              <button
               key={o}
               onClick={() => { playButtonSound(); setSelectedOperation(o); }}
-              className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-xl sm:text-2xl font-black rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
+              className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center ${o === 'random' ? 'text-xs sm:text-sm' : 'text-xl sm:text-2xl'} font-black rounded-lg shadow-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-white/50 border
               ${selectedOperation === o 
                 ? 'bg-white text-blue-700 scale-105 border-white/75' 
                 : 'bg-white/10 text-white hover:bg-white/20 border-white/50'}`}
@@ -152,6 +157,23 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
             ))}
           </div>
         </div>
+      )}
+
+      {selectedGameMode === 'timeAttack' && (
+          <div className="w-full animate-fade-in">
+            <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseDuration')}</h2>
+            <div className="grid grid-cols-3 gap-2.5">
+                {timeOptions.map(seconds => (
+                    <SelectionButton
+                        key={seconds}
+                        onClick={() => { playButtonSound(); setSelectedDuration(seconds); }}
+                        isSelected={selectedDuration === seconds}
+                    >
+                        {formatDuration(seconds)}
+                    </SelectionButton>
+                ))}
+            </div>
+          </div>
       )}
       
       <div className="w-full max-w-xs flex flex-col gap-3 mt-2">

@@ -52,6 +52,9 @@ const ScoringPage: React.FC<ScoringPageProps> = ({ onBack }) => {
             <ul className="list-disc list-inside ml-2">
                 <li>{t('streak3')}</li>
                 <li>{t('streak6')}</li>
+                <li>{t('streak10')}</li>
+                <li>{t('streak15')}</li>
+                <li>{t('streak20')}</li>
             </ul>
         </Section>
       </div>

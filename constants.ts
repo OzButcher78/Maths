@@ -5,7 +5,10 @@ export const POINTS_INCORRECT = -2;
 
 export const STREAK_BONUSES = [
   { streak: 3, bonus: 2 },
-  { streak: 6, bonus: 4 }
+  { streak: 6, bonus: 4 },
+  { streak: 10, bonus: 8 },
+  { streak: 15, bonus: 12 },
+  { streak: 20, bonus: 20 }
 ];
 
 // FIX: Updated the type definition for SCORE_MULTIPLIERS to correctly include ai_tiers as a property.

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Question, GameMode } from '../types';
 import LifeIcon from './icons/LifeIcon';
@@ -86,11 +87,20 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
   return (
     <div className="relative flex flex-col items-center gap-4 text-center animate-fade-in">
        {showWrongAnswerOverlay && (
-        <div className="absolute inset-0 bg-red-500/70 rounded-3xl flex items-center justify-center z-10 animate-fade-in">
-            <svg className="w-32 h-32 md:w-48 md:h-48 text-white" fill="none" stroke="currentColor" strokeWidth="12" viewBox="0 0 100 100">
-                <line x1="10" y1="10" x2="90" y2="90" />
-                <line x1="90" y1="10" x2="10" y2="90" />
-            </svg>
+        <div className="absolute inset-0 bg-red-500/95 backdrop-blur-sm rounded-3xl flex flex-col items-center z-20 animate-fade-in p-6">
+            <div className="mt-8 md:mt-12">
+                <p className="text-white/80 text-xl md:text-2xl font-bold uppercase tracking-widest">
+                    {t('wrongAnswer')}
+                </p>
+            </div>
+            <div className="flex-grow flex flex-col items-center justify-center pb-20 space-y-6">
+                <p className="text-white text-5xl md:text-6xl font-bold opacity-90">
+                    {question.num1} {question.operator} {question.num2}
+                </p>
+                <p className="text-white text-7xl md:text-9xl font-black drop-shadow-2xl">
+                    = {question.answer}
+                </p>
+            </div>
         </div>
       )}
       
@@ -168,7 +178,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
                 <TickIcon />
             </div>
         )}
-        {answerFeedback === 'incorrect' && (
+        {answerFeedback === 'incorrect' && !showWrongAnswerOverlay && (
             <div className="animate-fade-in">
                 <CrossIcon />
             </div>
