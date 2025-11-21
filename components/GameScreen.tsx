@@ -25,12 +25,10 @@ interface GameScreenProps {
   timer: number;
   justLostLife: boolean;
   multiplier: number;
-  correctTally: number;
-  incorrectTally: number;
   playTickSound: () => void;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, isBonusActive, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, correctTally, incorrectTally, playTickSound }) => {
+const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, isBonusActive, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, playTickSound }) => {
   const [answer, setAnswer] = useState('');
   const { t } = useLocalization();
 
@@ -148,28 +146,8 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
         playButtonSound={playButtonSound}
       />
 
-      <div className="w-full max-w-xs flex justify-between items-center mt-4 h-12 px-2">
+      <div className="w-full max-w-xs flex justify-center items-center mt-4 h-12 px-2">
         <StreakIndicator streak={streak} isBonusActive={isBonusActive} />
-        <div className="flex items-center bg-black/20 rounded-full overflow-hidden shadow-inner border border-white/10">
-            <div 
-                className="flex items-center justify-center gap-1.5 px-3 py-1 bg-green-500/50" 
-                title={`${correctTally} ${t('correct')}`}
-            >
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="font-bold text-base text-white">{correctTally}</span>
-            </div>
-            <div 
-                className="flex items-center justify-center gap-1.5 px-3 py-1 bg-red-500/50" 
-                title={`${incorrectTally} ${t('incorrect')}`}
-            >
-                <span className="font-bold text-base text-white">{incorrectTally}</span>
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </div>
-        </div>
       </div>
 
       <div className="h-10 flex items-center justify-center gap-4">

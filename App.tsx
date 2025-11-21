@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats, MultiplicationTableOption } from './types';
 import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, SPLASH_MESSAGES, SCORE_MULTIPLIERS, MULTIPLICATION_ROW_POINTS, MULTIPLICATION_ROW_SCORES } from './constants';
 import { generateQuestion } from './services/gameLogic';
-import { isNameInappropriate } from './services/geminiService';
 import MenuScreen from './components/MenuScreen';
 import GameScreen from './components/GameScreen';
 import GameOverScreen from './components/GameOverScreen';
@@ -116,17 +115,6 @@ function App() {
     setTimeout(() => setSplashData(null), 1500);
   }, [playSplashScreenSound]);
 
-  // Minute Bonus Logic for Time Attack
-  useEffect(() => {
-    if (gameState === 'playing' && gameMode === 'timeAttack' && selectedTimeDuration > 60) {
-        if (timer > 0 && timer < selectedTimeDuration && timer % 60 === 0) {
-            setScore(prev => prev + 20);
-            playMilestoneSound();
-            showSplashScreen(['minuteBonus']);
-        }
-    }
-  }, [timer, gameState, gameMode, selectedTimeDuration, playMilestoneSound, showSplashScreen]);
-
 
   const saveLeaderboard = (newLeaderboard: ScoreEntry[]) => {
     try {
@@ -164,7 +152,14 @@ function App() {
     setSelectedTimeDuration(duration);
     
     if (selectedDifficulty) {
-      const initialMultiplier = SCORE_MULTIPLIERS[selectedDifficulty] || 1;
+      let initialMultiplier = SCORE_MULTIPLIERS[selectedDifficulty] || 1;
+      
+      // Special multiplier logic for Time Attack
+      if (selectedGameMode === 'timeAttack') {
+        if (selectedDifficulty === 'easy') initialMultiplier = 1.5;
+        // Medium (2) and Hard (3) remain the same as standard constants
+      }
+      
       setCurrentMultiplier(initialMultiplier);
     } else {
       setCurrentMultiplier(1);
@@ -334,9 +329,6 @@ function App() {
   const handleAddToLeaderboard = async (name: string): Promise<string> => {
     if(!gameMode) return "Error: Game settings not found.";
 
-    const inappropriate = await isNameInappropriate(name);
-    if (inappropriate) return t('nameInappropriateError');
-    
     const currentDifficulty = difficulty || 'hard';
     const currentOperation = operation || 'random';
 
@@ -377,11 +369,6 @@ function App() {
   const renderGameState = () => {
     switch (gameState) {
       case 'playing': {
-        const allOps: Operation[] = ['addition', 'subtraction', 'multiplication', 'division', 'random'];
-        const totalCorrect = allOps.reduce((sum, op) => sum + (performanceStats[op]?.correct || 0), 0);
-        const totalQuestions = allOps.reduce((sum, op) => sum + (performanceStats[op]?.total || 0), 0);
-        const totalIncorrect = totalQuestions - totalCorrect;
-
         return question && gameMode && (
           <GameScreen
             question={question}
@@ -397,8 +384,6 @@ function App() {
             timer={timer}
             justLostLife={justLostLife}
             multiplier={currentMultiplier}
-            correctTally={totalCorrect}
-            incorrectTally={totalIncorrect}
             playTickSound={playTickSound}
           />
         );
@@ -486,7 +471,6 @@ function App() {
       </div>
     </div>
   );
-  
 }
 
 export default App;

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ScoreEntry, Difficulty, GameMode, PerformanceStats, Operation } from '../types';
 import Leaderboard from './Leaderboard';
@@ -20,7 +21,6 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const { t } = useLocalization();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,9 +30,9 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
       return;
     }
     setError('');
-    setLoading(true);
+    
     const result = await onAddToLeaderboard(name);
-    setLoading(false);
+    
     if (result === "Success") {
         setSubmitted(true);
     } else {
@@ -90,10 +90,9 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
           {error && <p className="text-red-300 font-bold">{error}</p>}
           <button 
             type="submit" 
-            disabled={loading} 
             className="w-full py-3 px-6 text-base md:text-xl font-bold text-white bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-yellow-300 transform hover:scale-105 disabled:bg-gray-400 flex items-center justify-center gap-2"
           >
-            {loading ? t('checking') : t('submitScore')}
+            {t('submitScore')}
             <ThumbsUpIcon />
           </button>
         </form>
