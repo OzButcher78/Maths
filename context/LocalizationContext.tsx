@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 // Define the shape of the context
@@ -14,12 +15,6 @@ const LocalizationContext = createContext<LocalizationContextType | undefined>(u
 export const supportedLanguages = [
     { code: 'de', name: 'Deutsch' },
     { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' },
-    { code: 'fr', name: 'Français' },
-    { code: 'it', name: 'Italiano' },
-    { code: 'pt', name: 'Português' },
-    { code: 'uk', name: 'Українська' },
-    { code: 'hr', name: 'Hrvatski' },
 ];
 
 export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
