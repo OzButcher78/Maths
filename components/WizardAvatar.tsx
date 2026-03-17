@@ -13,7 +13,7 @@ const FRAMES: Record<WizardState, string[]> = {
   attack2: Array.from({ length: 5 }, (_, i) => `/wizard/attack-2-${i + 1}.png`),
   hurt:    ['/wizard/hurt.png'],
   dizzy:   Array.from({ length: 3 }, (_, i) => `/wizard/dizzy-${i + 1}.png`),
-  die:     Array.from({ length: 7 }, (_, i) => `/wizard/die-${i + 1}.png`),
+  die:     Array.from({ length: 6 }, (_, i) => `/wizard/die-${i + 1}.png`),
   jump:    ['/wizard/jump.png'],
 };
 

@@ -4,7 +4,6 @@ import { ScoreEntry, Difficulty, GameMode, PerformanceStats, Operation } from '.
 import Leaderboard from './Leaderboard';
 import { useLocalization } from '../context/LocalizationContext';
 import PlayIcon from './icons/PlayIcon';
-import ThumbsUpIcon from './icons/ThumbsUpIcon';
 import WizardAvatar from './WizardAvatar';
 
 interface GameOverScreenProps {
@@ -21,23 +20,29 @@ interface GameOverScreenProps {
 
 const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onAddToLeaderboard, onPlayAgain, onShowStats, difficulty, gameMode, stats, gameOverReason }) => {
   const [name, setName] = useState('');
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const { t } = useLocalization();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim().length < 3) {
+  const handlePlayAgain = async () => {
+    const trimmed = name.trim();
+    if (trimmed.length === 0) {
+      // No name entered — just restart without saving
+      onPlayAgain();
+      return;
+    }
+    if (trimmed.length < 3) {
       setError(t('nameValidationError'));
       return;
     }
-    setError('');
-    const result = await onAddToLeaderboard(name);
-    if (result === 'Success') {
-      setSubmitted(true);
-    } else {
+    setSaving(true);
+    const result = await onAddToLeaderboard(trimmed);
+    if (result !== 'Success') {
       setError(result);
+      setSaving(false);
+      return;
     }
+    onPlayAgain();
   };
 
   const allOps: Operation[] = ['addition', 'subtraction', 'multiplication', 'division', 'random'];
@@ -86,49 +91,27 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
         </div>
       </div>
 
-      {/* Name form */}
-      {!submitted ? (
-        <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-2 items-center">
-          <p className="text-base">{t('enterNamePrompt')}</p>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={15}
-            className="w-full text-center text-xl p-1.5 rounded-lg bg-white/90 text-blue-800 placeholder-blue-400/50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
-            placeholder={t('namePlaceholder')}
-          />
-          {error && <p className="text-red-300 font-bold text-sm">{error}</p>}
-          <div className="w-full grid grid-cols-2 gap-2">
-            <button
-              type="submit"
-              className="py-2.5 text-base font-bold text-white bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all focus:outline-none focus:ring-4 focus:ring-yellow-300 flex items-center justify-center gap-1"
-            >
-              {t('submitScore')}
-              <ThumbsUpIcon />
-            </button>
-            <button
-              type="button"
-              onClick={onPlayAgain}
-              className="py-2.5 text-base font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-1"
-            >
-              {t('playAgain')}
-              <PlayIcon />
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="flex items-center gap-3">
-          <p className="text-base font-bold text-green-300">{t('scoreAdded')}</p>
-          <button
-            onClick={onPlayAgain}
-            className="py-2 px-4 text-base font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center gap-1"
-          >
-            {t('playAgain')}
-            <PlayIcon />
-          </button>
-        </div>
-      )}
+      {/* Name + play again */}
+      <div className="w-full max-w-sm flex flex-col gap-2 items-center">
+        <p className="text-base">{t('enterNamePrompt')}</p>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => { setName(e.target.value); setError(''); }}
+          maxLength={15}
+          className="w-full text-center text-xl p-1.5 rounded-lg bg-white/90 text-blue-800 placeholder-blue-400/50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
+          placeholder={t('namePlaceholder')}
+        />
+        {error && <p className="text-red-300 font-bold text-sm">{error}</p>}
+        <button
+          onClick={handlePlayAgain}
+          disabled={saving}
+          className="w-full py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {saving ? t('checking') : t('playAgain')}
+          <PlayIcon />
+        </button>
+      </div>
 
       <div className="w-full">
         <Leaderboard scores={leaderboard} />
