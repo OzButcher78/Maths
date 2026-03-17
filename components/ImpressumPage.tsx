@@ -43,7 +43,9 @@ const ImpressumPage: React.FC<ImpressumPageProps> = ({ onBack }) => {
          ))}
       </div>
 
-      <button onClick={onBack} className="w-full max-w-sm mt-4 py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2">
+      <img src="/locales/8214.png" alt="" width={80} className="opacity-70" draggable={false} />
+
+      <button onClick={onBack} className="w-full max-w-sm py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2">
         <BackIcon />
         {t('backToMenu')}
       </button>

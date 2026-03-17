@@ -17,9 +17,22 @@ export const supportedLanguages = [
     { code: 'en', name: 'English' },
 ];
 
+// Minimal fallback so the UI never goes fully blank if locale files fail to load
+const FALLBACK_TRANSLATIONS: Record<string, string> = {
+  gameTitle: 'Math Master',
+  startGame: 'Start Game!',
+  playAgain: 'Play Again',
+  back: 'Back',
+  exitGame: 'Exit',
+  score: 'Score',
+  lives: 'Lives',
+  streak: 'Streak',
+  gameOver: 'Game Over!',
+};
+
 export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<string>('de');
-  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [translations, setTranslations] = useState<Record<string, string>>(FALLBACK_TRANSLATIONS);
 
   const fetchTranslations = useCallback(async (lang: string) => {
     try {
@@ -35,6 +48,7 @@ export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (lang !== 'en') {
         fetchTranslations('en');
       }
+      // If English also fails, FALLBACK_TRANSLATIONS remain in state
     }
   }, []);
 

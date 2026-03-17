@@ -10,6 +10,9 @@ import { INITIAL_LIVES } from '../constants';
 import TickIcon from './icons/TickIcon';
 import CrossIcon from './icons/CrossIcon';
 import StreakIndicator from './StreakIndicator';
+import ConfettiEffect from './ConfettiEffect';
+import FloatingScore from './FloatingScore';
+import WizardAvatar from './WizardAvatar';
 
 interface GameScreenProps {
   question: Question;
@@ -26,11 +29,19 @@ interface GameScreenProps {
   justLostLife: boolean;
   multiplier: number;
   playTickSound: () => void;
+  lastPoints?: number | null;
+  showPointsPopup?: boolean;
+  onPopupComplete?: () => void;
+  timerTotal?: number;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, isBonusActive, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, playTickSound }) => {
+const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, isBonusActive, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, playTickSound, lastPoints = null, showPointsPopup = false, onPopupComplete = () => {}, timerTotal = 60 }) => {
   const [answer, setAnswer] = useState('');
+  const [triggerConfetti, setTriggerConfetti] = useState(false);
   const { t } = useLocalization();
+
 
   useEffect(() => {
     setAnswer('');
@@ -81,12 +92,22 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
     }
   }, [timer, gameMode, playTickSound]);
 
+  useEffect(() => {
+    if (answerFeedback === 'correct') {
+      setTriggerConfetti(true);
+      const t = setTimeout(() => setTriggerConfetti(false), 50);
+      return () => clearTimeout(t);
+    }
+  }, [answerFeedback]);
 
   return (
     <div className="relative flex flex-col items-center gap-4 text-center animate-fade-in">
+      <ConfettiEffect trigger={triggerConfetti} />
+      <FloatingScore amount={lastPoints} visible={showPointsPopup} onComplete={onPopupComplete} />
        {showWrongAnswerOverlay && (
         <div className="absolute inset-0 bg-red-500/95 backdrop-blur-sm rounded-3xl flex flex-col items-center z-20 animate-fade-in p-6">
-            <div className="mt-8 md:mt-12">
+            <div className="mt-8 md:mt-12 flex flex-col items-center gap-2">
+                <WizardAvatar state="dizzy" size={130} />
                 <p className="text-white/80 text-xl md:text-2xl font-bold uppercase tracking-widest">
                     {t('wrongAnswer')}
                 </p>
@@ -128,7 +149,24 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
             </div>
         )}
       </div>
-      
+
+      {gameMode === 'timeAttack' && (
+        <div className="w-full px-1">
+          <div className="w-full h-3 bg-black/20 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ${
+                timer / timerTotal > 0.6
+                  ? 'bg-green-400'
+                  : timer / timerTotal > 0.3
+                  ? 'bg-yellow-400'
+                  : 'bg-red-500 animate-pulse'
+              }`}
+              style={{ width: `${Math.max(0, (timer / timerTotal) * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="bg-white/30 p-6 rounded-2xl shadow-lg w-full">
         <p className="text-5xl md:text-7xl font-black tracking-wider text-blue-900 drop-shadow-lg">
           {question.num1} {question.operator} {question.num2}

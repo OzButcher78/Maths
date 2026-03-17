@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats, MultiplicationTableOption } from './types';
+import { Difficulty, Operation, GameState, Question, ScoreEntry, GameMode, PerformanceStats, MultiplicationTableOption, AiTierProgress } from './types';
 import { INITIAL_LIVES, POINTS_CORRECT, POINTS_INCORRECT, STREAK_BONUSES, TIME_ATTACK_DURATION, SPLASH_MESSAGES, SCORE_MULTIPLIERS, MULTIPLICATION_ROW_POINTS, MULTIPLICATION_ROW_SCORES } from './constants';
 import { generateQuestion } from './services/gameLogic';
 import MenuScreen from './components/MenuScreen';
@@ -25,6 +25,7 @@ const initialStats: PerformanceStats = {
   multiplication: { correct: 0, total: 0 },
   division: { correct: 0, total: 0 },
   random: { correct: 0, total: 0 },
+  rangeStats: {},
 };
 
 function App() {
@@ -52,24 +53,32 @@ function App() {
   const [multiplicationTable, setMultiplicationTable] = useState<MultiplicationTableOption | null>(null);
   const [selectedTimeDuration, setSelectedTimeDuration] = useState<number>(TIME_ATTACK_DURATION);
 
+  const [aiTierProgress, setAiTierProgress] = useState<AiTierProgress>({ tier: 1, questionsInTier: 0, correctInTier: 0 });
+  const [weakQuestions, setWeakQuestions] = useState<Question[]>([]);
+  const [lastPoints, setLastPoints] = useState<number | null>(null);
+  const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const [gameOverReason, setGameOverReason] = useState<'lives' | 'timeout' | 'exit'>('exit');
+
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { t } = useLocalization();
-  const { 
-    playCorrectSound, 
-    playIncorrectSound, 
-    playStreak3Sound, 
-    playStreak6Sound, 
-    playStreak10Sound, 
-    playStreak15Sound, 
+  const {
+    playCorrectSound,
+    playIncorrectSound,
+    playStreak3Sound,
+    playStreak6Sound,
+    playStreak10Sound,
+    playStreak15Sound,
     playStreak20Sound,
-    playGameOverSound, 
-    playButtonPressSound, 
-    playSplashScreenSound, 
-    unlockAudio, 
-    playMultiplierSound, 
-    playMilestoneSound, 
-    playTickSound 
+    playGameOverSound,
+    playButtonPressSound,
+    playSplashScreenSound,
+    unlockAudio,
+    playMultiplierSound,
+    playMilestoneSound,
+    playTickSound,
+    isMuted,
+    toggleMute,
   } = useSounds();
 
   useEffect(() => {
@@ -98,6 +107,7 @@ function App() {
                 if (prev <= 1) {
                     clearTimer();
                     playGameOverSound();
+                    setGameOverReason('timeout');
                     setGameState('gameOver');
                     return 0;
                 }
@@ -139,6 +149,10 @@ function App() {
     setJustLostLife(false);
     setCurrentMultiplier(1);
     setMultiplicationTable(null);
+    setAiTierProgress({ tier: 1, questionsInTier: 0, correctInTier: 0 });
+    setWeakQuestions([]);
+    setLastPoints(null);
+    setShowPointsPopup(false);
     clearTimer();
   }, []);
 
@@ -202,10 +216,21 @@ function App() {
     setPerformanceStats(prevStats => {
         const op = question.operation;
         const newOpStats = {
-            total: prevStats[op].total + 1,
-            correct: prevStats[op].correct + (isCorrect ? 1 : 0)
+            total: (prevStats[op]?.total ?? 0) + 1,
+            correct: (prevStats[op]?.correct ?? 0) + (isCorrect ? 1 : 0)
         };
-        return { ...prevStats, [op]: newOpStats };
+        // Number range tracking
+        const maxNum = Math.max(question.num1, question.num2);
+        const range = maxNum <= 10 ? '1–10' : maxNum <= 20 ? '11–20' : maxNum <= 50 ? '21–50' : maxNum <= 100 ? '51–100' : '101+';
+        const existingRange = prevStats.rangeStats[range] || { correct: 0, total: 0 };
+        const newRangeStats = {
+            ...prevStats.rangeStats,
+            [range]: {
+                total: existingRange.total + 1,
+                correct: existingRange.correct + (isCorrect ? 1 : 0),
+            },
+        };
+        return { ...prevStats, [op]: newOpStats, rangeStats: newRangeStats };
     });
     
     let splashScreenWillShow = false;
@@ -216,7 +241,7 @@ function App() {
         const tiers = Object.keys(SCORE_MULTIPLIERS.ai_tiers).map(Number).sort((a,b) => a-b);
         let newMultiplier = 1;
         for(const tier of tiers) {
-            if(questionCount >= tier) {
+            if(questionCount > tier) {
                 newMultiplier = SCORE_MULTIPLIERS.ai_tiers[tier];
             }
         }
@@ -268,12 +293,10 @@ function App() {
       }
 
       setScore(score + pointsToAdd);
+      setLastPoints(pointsToAdd);
+      setShowPointsPopup(true);
 
-      if (maxStreak > 0 && newStreak >= maxStreak) {
-        setStreak(0);
-      } else {
-        setStreak(newStreak);
-      }
+      setStreak(newStreak);
       
       const isStreakMilestone = !!streakBonus;
       const isProgressMilestone = (questionCount + 1) % 10 === 0 && (questionCount + 1) > 0;
@@ -294,9 +317,15 @@ function App() {
       setAnswerFeedback('incorrect');
       setShowWrongAnswerOverlay(true);
       playIncorrectSound();
-      setScore(Math.max(0, score + (POINTS_INCORRECT * (operation === 'multiplication' && difficulty === null ? 1 : multiplier))));
+      setScore(Math.max(0, score + POINTS_INCORRECT));
       setStreak(0);
-      
+
+      // Add to spaced repetition pool
+      setWeakQuestions(prev => {
+        const updated = [...prev, question];
+        return updated.length > 10 ? updated.slice(updated.length - 10) : updated;
+      });
+
       if (gameMode === 'regular') {
         const newLives = lives - 1;
         setLives(newLives);
@@ -309,21 +338,48 @@ function App() {
     }
     
     setQuestionCount(prev => prev + 1);
-    
-    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 500 : 2000);
+
+    // AI accuracy-based tier progression
+    let currentAiTier = aiTierProgress.tier;
+    if (difficulty === 'ai') {
+      const newQIT = aiTierProgress.questionsInTier + 1;
+      const newCIT = aiTierProgress.correctInTier + (isCorrect ? 1 : 0);
+      if (newQIT >= 5) {
+        const accuracy = newCIT / newQIT;
+        if (accuracy >= 0.85 && currentAiTier < 5) {
+          currentAiTier = currentAiTier + 1;
+          setAiTierProgress({ tier: currentAiTier, questionsInTier: 0, correctInTier: 0 });
+        } else if (accuracy < 0.60 && currentAiTier > 1) {
+          currentAiTier = currentAiTier - 1;
+          setAiTierProgress({ tier: currentAiTier, questionsInTier: 0, correctInTier: 0 });
+        } else {
+          setAiTierProgress({ tier: currentAiTier, questionsInTier: newQIT, correctInTier: newCIT });
+        }
+      } else {
+        setAiTierProgress({ tier: currentAiTier, questionsInTier: newQIT, correctInTier: newCIT });
+      }
+    }
+
+    const delay = splashScreenWillShow ? 1500 : (isCorrect ? 1500 : 3000);
 
     setTimeout(() => {
         if (isGameOver) {
+            setGameOverReason('lives');
             setGameState('gameOver');
             setShowWrongAnswerOverlay(false);
         } else {
             if (lives > 0 || gameMode === 'timeAttack') {
-                setQuestion(generateQuestion(difficulty, operation, difficulty === 'ai' ? questionCount + 1 : undefined, multiplicationTable, question));
+                setQuestion(generateQuestion(difficulty, operation, difficulty === 'ai' ? aiTierToQuestionCount(currentAiTier) : undefined, multiplicationTable, question, weakQuestions));
             }
             setAnswerFeedback(null);
             setShowWrongAnswerOverlay(false);
         }
     }, delay);
+  };
+
+  const aiTierToQuestionCount = (tier: number): number => {
+    const tierMap: Record<number, number> = { 1: 5, 2: 15, 3: 25, 4: 35, 5: 45 };
+    return tierMap[tier] ?? 5;
   };
   
   const handleAddToLeaderboard = async (name: string): Promise<string> => {
@@ -349,8 +405,11 @@ function App() {
   const handleExitGame = () => {
     playButtonPressSound();
     clearTimer();
+    setGameOverReason('exit');
     setGameState('gameOver');
   };
+
+  const handlePopupComplete = useCallback(() => setShowPointsPopup(false), []);
 
   const handleShowStats = () => setGameState('stats');
   const handleBackToGameOver = () => setGameState('gameOver');
@@ -385,12 +444,16 @@ function App() {
             justLostLife={justLostLife}
             multiplier={currentMultiplier}
             playTickSound={playTickSound}
+            timerTotal={selectedTimeDuration}
+            lastPoints={lastPoints}
+            showPointsPopup={showPointsPopup}
+            onPopupComplete={handlePopupComplete}
           />
         );
       }
       case 'gameOver':
         return (
-            <GameOverScreen 
+            <GameOverScreen
                 score={score}
                 leaderboard={leaderboard}
                 onAddToLeaderboard={handleAddToLeaderboard}
@@ -399,6 +462,7 @@ function App() {
                 difficulty={difficulty}
                 gameMode={gameMode}
                 stats={performanceStats}
+                gameOverReason={gameOverReason}
             />
         );
       case 'stats':
@@ -419,7 +483,7 @@ function App() {
         return <MultiplicationSetupScreen onStart={handleStartMultiplicationGame} onBack={handleBackToMenuFromSetup} playButtonSound={playButtonPressSound} />;
       case 'menu':
       default:
-        return <MenuScreen onStartGame={handleGameSelection} playButtonSound={playButtonPressSound} leaderboard={leaderboard} />;
+        return <MenuScreen onStartGame={handleGameSelection} playButtonSound={playButtonPressSound} leaderboard={leaderboard} isMuted={isMuted} onToggleMute={toggleMute} />;
     }
   };
 
@@ -453,7 +517,7 @@ function App() {
                     </div>
                     
                     <div className="text-xs text-white/60 px-4 flex flex-col items-center gap-1.5 mt-1">
-                        <span className="opacity-90">© 2025 Dieter Balmer</span>
+                        <span className="opacity-90">© 2026 Dieter Balmer</span>
                         <div className="flex flex-wrap justify-center items-center gap-x-2">
                              <button onClick={() => handleShowPage('impressum')} className="hover:text-white hover:underline">{t('impressum')}</button>
                              <span>|</span>

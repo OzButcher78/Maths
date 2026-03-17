@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 // Frequencies for musical notes to create simple melodies
 const NOTE_FREQ = {
@@ -23,6 +23,7 @@ const NOTE_FREQ = {
 
 const useSounds = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   // This function MUST be called after a user interaction to allow audio playback in browsers.
   const unlockAudio = useCallback(() => {
@@ -43,6 +44,7 @@ const useSounds = () => {
   }, []);
 
   const playSound = useCallback((notes: { freq: number, start: number, duration: number, type?: OscillatorType, vol?: number }[]) => {
+    if (isMuted) return;
     const audioContext = audioContextRef.current;
     if (!audioContext) {
       // Don't warn on every button press before audio is unlocked
@@ -74,7 +76,7 @@ const useSounds = () => {
       oscillator.start(now + note.start);
       oscillator.stop(now + note.start + note.duration);
     });
-  }, []);
+  }, [isMuted]);
 
   // Pleasant ascending two-note sound for a correct answer
   const playCorrectSound = useCallback(() => {
@@ -190,7 +192,9 @@ const useSounds = () => {
     ]);
   }, [playSound]);
 
-  return { 
+  const toggleMute = useCallback(() => setIsMuted(m => !m), []);
+
+  return {
     playCorrectSound, 
     playIncorrectSound, 
     playStreak3Sound,
@@ -203,8 +207,10 @@ const useSounds = () => {
     playSplashScreenSound, 
     unlockAudio, 
     playMultiplierSound, 
-    playMilestoneSound, 
-    playTickSound 
+    playMilestoneSound,
+    playTickSound,
+    isMuted,
+    toggleMute,
   };
 };
 

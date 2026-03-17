@@ -4,9 +4,18 @@ const randomNumber = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-export const generateQuestion = (difficulty: Difficulty | null, operation: Operation, questionCount?: number, multiplicationTable?: MultiplicationTableOption | null, previousQuestion?: Question | null): Question => {
+export const generateQuestion = (difficulty: Difficulty | null, operation: Operation, questionCount?: number, multiplicationTable?: MultiplicationTableOption | null, previousQuestion?: Question | null, weakQuestions?: Question[]): Question => {
   let newQuestion: Question;
-  
+
+  // Spaced repetition: 30% chance to re-test a previously missed question
+  if (weakQuestions && weakQuestions.length > 0 && Math.random() < 0.30) {
+    const pick = weakQuestions[Math.floor(Math.random() * weakQuestions.length)];
+    // Make sure it's not the same as previousQuestion
+    if (!previousQuestion || pick.num1 !== previousQuestion.num1 || pick.num2 !== previousQuestion.num2 || pick.operation !== previousQuestion.operation) {
+      return pick;
+    }
+  }
+
   // Safety break to prevent infinite loops in rare cases
   let attempts = 0;
   const MAX_ATTEMPTS = 10;
@@ -71,7 +80,7 @@ export const generateQuestion = (difficulty: Difficulty | null, operation: Opera
         } else {
             // Existing logic for easy, hard, and AI difficulties
             num1 = randomNumber(r.sub[0], r.sub[1]);
-            num2 = randomNumber(r.sub[0], num1); // Ensure num2 is not greater than num1
+            num2 = randomNumber(1, num1); // Ensure num2 is not greater than num1
         }
         answer = num1 - num2;
         newQuestion = { num1, num2, operation: 'subtraction', operator: '-', answer };

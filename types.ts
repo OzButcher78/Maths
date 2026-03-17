@@ -14,6 +14,12 @@ export interface Question {
   answer: number;
 }
 
+export interface AiTierProgress {
+  tier: number;          // 1-5, current difficulty tier
+  questionsInTier: number;
+  correctInTier: number;
+}
+
 export interface ScoreEntry {
   name: string;
   score: number;
@@ -22,9 +28,15 @@ export interface ScoreEntry {
   gameMode: GameMode;
 }
 
+export interface RangeStats {
+  [range: string]: { correct: number; total: number };
+}
+
 export type PerformanceStats = {
   [key in Operation]?: {
     correct: number;
     total: number;
   };
+} & {
+  rangeStats: RangeStats;
 };

@@ -62,7 +62,7 @@ const MultiplicationSetupScreen: React.FC<MultiplicationSetupScreenProps> = ({ o
         </button>
         <button
           onClick={onBack}
-          className="w-full py-3 text-lg font-bold text-white bg-indigo-500 rounded-xl shadow-lg hover:bg-indigo-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+          className="w-full py-3 text-lg font-bold text-white bg-green-500 rounded-xl shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300"
         >
           {t('backToMenu')}
         </button>

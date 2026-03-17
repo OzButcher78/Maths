@@ -5,6 +5,7 @@ import Leaderboard from './Leaderboard';
 import { useLocalization } from '../context/LocalizationContext';
 import PlayIcon from './icons/PlayIcon';
 import ThumbsUpIcon from './icons/ThumbsUpIcon';
+import WizardAvatar from './WizardAvatar';
 
 interface GameOverScreenProps {
   score: number;
@@ -15,9 +16,10 @@ interface GameOverScreenProps {
   difficulty: Difficulty | null;
   gameMode: GameMode | null;
   stats: PerformanceStats;
+  gameOverReason: 'lives' | 'timeout' | 'exit';
 }
 
-const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onAddToLeaderboard, onPlayAgain, onShowStats, difficulty, gameMode, stats }) => {
+const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onAddToLeaderboard, onPlayAgain, onShowStats, difficulty, gameMode, stats, gameOverReason }) => {
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -30,13 +32,11 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
       return;
     }
     setError('');
-    
     const result = await onAddToLeaderboard(name);
-    
-    if (result === "Success") {
-        setSubmitted(true);
+    if (result === 'Success') {
+      setSubmitted(true);
     } else {
-        setError(result);
+      setError(result);
     }
   };
 
@@ -45,76 +45,103 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, leaderboard, onA
   const totalCorrect = allOps.reduce((sum, op) => sum + (stats[op]?.correct || 0), 0);
   const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
+  const wizardState = gameOverReason === 'lives' ? 'die' : gameOverReason === 'timeout' ? 'attack2' : 'idle';
 
   return (
-    <div className="flex flex-col items-center gap-6 text-center animate-fade-in">
-      <h2 className="text-4xl md:text-5xl font-black text-yellow-300">{t('gameOver')}</h2>
-      <p className="text-xl md:text-2xl">{t('finalScore')}</p>
-      <p className="text-6xl md:text-7xl font-black">{score}</p>
-      
-      <div className="w-full max-w-sm bg-black/20 p-3 rounded-xl">
-        <h3 className="text-base md:text-xl font-bold mb-2">{t('gameSummary')}</h3>
+    <div className="flex flex-col items-center gap-3 text-center animate-fade-in">
+      <h2 className="text-3xl font-black text-yellow-300">{t('gameOver')}</h2>
+
+      {/* Score centred, wizard anchored to the left */}
+      <div className="w-full flex items-center">
+        <div className="flex-none"><WizardAvatar state={wizardState} size={130} /></div>
+        <div className="flex-1 flex flex-col items-center">
+          <p className="text-base opacity-80">{t('finalScore')}</p>
+          <p className="text-5xl md:text-6xl font-black">{score}</p>
+        </div>
+        <div className="flex-none" style={{ width: 130 }} />
+      </div>
+
+      {/* Summary box */}
+      <div className="w-full max-w-sm bg-black/20 p-2 rounded-xl">
+        <h3 className="text-sm font-bold mb-1">{t('gameSummary')}</h3>
         <div className="flex justify-around text-center">
-            {gameMode === 'regular' && (
-                <div>
-                    <p className="text-3xl font-bold">{accuracy}%</p>
-                    <p className="text-sm opacity-80">{t('accuracy')}</p>
-                </div>
-            )}
-             {gameMode === 'timeAttack' && (
-                <>
-                    <div>
-                        <p className="text-3xl font-bold">{totalQuestions}</p>
-                        <p className="text-sm opacity-80">{t('questionsAnswered')}</p>
-                    </div>
-                     <div>
-                        <p className="text-3xl font-bold text-green-400">{totalCorrect}</p>
-                        <p className="text-sm opacity-80">{t('correctAnswers')}</p>
-                    </div>
-                </>
-            )}
+          {gameMode === 'regular' && (
+            <div>
+              <p className="text-2xl font-bold">{accuracy}%</p>
+              <p className="text-xs opacity-80">{t('accuracy')}</p>
+            </div>
+          )}
+          {gameMode === 'timeAttack' && (
+            <>
+              <div>
+                <p className="text-2xl font-bold">{totalQuestions}</p>
+                <p className="text-xs opacity-80">{t('questionsAnswered')}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-green-400">{totalCorrect}</p>
+                <p className="text-xs opacity-80">{t('correctAnswers')}</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
+      {/* Name form */}
       {!submitted ? (
-        <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4 items-center mt-2">
-          <p className="text-lg">{t('enterNamePrompt')}</p>
+        <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-2 items-center">
+          <p className="text-base">{t('enterNamePrompt')}</p>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={15}
-            className="w-full text-center text-2xl p-2 rounded-lg bg-white/90 text-blue-800 placeholder-blue-400/50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
+            className="w-full text-center text-xl p-1.5 rounded-lg bg-white/90 text-blue-800 placeholder-blue-400/50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
             placeholder={t('namePlaceholder')}
           />
-          {error && <p className="text-red-300 font-bold">{error}</p>}
-          <button 
-            type="submit" 
-            className="w-full py-3 px-6 text-base md:text-xl font-bold text-white bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-yellow-300 transform hover:scale-105 disabled:bg-gray-400 flex items-center justify-center gap-2"
-          >
-            {t('submitScore')}
-            <ThumbsUpIcon />
-          </button>
+          {error && <p className="text-red-300 font-bold text-sm">{error}</p>}
+          <div className="w-full grid grid-cols-2 gap-2">
+            <button
+              type="submit"
+              className="py-2.5 text-base font-bold text-white bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all focus:outline-none focus:ring-4 focus:ring-yellow-300 flex items-center justify-center gap-1"
+            >
+              {t('submitScore')}
+              <ThumbsUpIcon />
+            </button>
+            <button
+              type="button"
+              onClick={onPlayAgain}
+              className="py-2.5 text-base font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-1"
+            >
+              {t('playAgain')}
+              <PlayIcon />
+            </button>
+          </div>
         </form>
       ) : (
-        <p className="text-xl font-bold text-green-300">{t('scoreAdded')}</p>
+        <div className="flex items-center gap-3">
+          <p className="text-base font-bold text-green-300">{t('scoreAdded')}</p>
+          <button
+            onClick={onPlayAgain}
+            className="py-2 px-4 text-base font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 flex items-center gap-1"
+          >
+            {t('playAgain')}
+            <PlayIcon />
+          </button>
+        </div>
       )}
 
-      <div className="w-full mt-4">
+      <div className="w-full">
         <Leaderboard scores={leaderboard} />
       </div>
 
-      <div className="w-full max-w-sm mt-4 flex flex-col gap-3">
-        <button onClick={onPlayAgain} className="flex items-center justify-center gap-2 py-3 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
-          {t('playAgain')}
-          <PlayIcon />
+      {difficulty === 'ai' && (
+        <button
+          onClick={onShowStats}
+          className="w-full max-w-sm py-2.5 text-base font-bold text-white bg-sky-500 rounded-lg shadow-lg hover:bg-sky-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-sky-300"
+        >
+          {t('aiStats')}
         </button>
-        {difficulty === 'ai' && (
-            <button onClick={onShowStats} className="py-3 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-lg hover:bg-purple-600 transition-transform transform hover:scale-105">
-                {t('aiStats')}
-            </button>
-        )}
-      </div>
+      )}
     </div>
   );
 };

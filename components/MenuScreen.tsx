@@ -9,6 +9,8 @@ interface MenuScreenProps {
   onStartGame: (operation: Operation, difficulty: Difficulty | null, gameMode: GameMode, duration?: number) => void;
   playButtonSound: () => void;
   leaderboard: ScoreEntry[];
+  isMuted: boolean;
+  onToggleMute: () => void;
 }
 
 const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'ai'];
@@ -29,7 +31,7 @@ const gameModeIcons: Record<GameMode, string> = {
     timeAttack: '⏱️',
 };
 
-const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, leaderboard }) => {
+const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, leaderboard, isMuted, onToggleMute }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
   const [selectedGameMode, setSelectedGameMode] = useState<GameMode | null>(null);
@@ -56,11 +58,18 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
       setShowLeaderboard(false);
   }
 
-  const difficultyDisplay = {
+  const difficultyLabel: Record<Difficulty, string> = {
     easy: t('easy'),
     medium: t('medium'),
     hard: t('hard'),
     ai: t('ai'),
+  };
+
+  const difficultyAge: Record<Difficulty, string> = {
+    easy: '5–7',
+    medium: '7–9',
+    hard: '9–11',
+    ai: '★',
   };
 
   const gameModeDisplay = {
@@ -105,7 +114,17 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
 
   return (
     <div className="flex flex-col items-center gap-5 animate-fade-in">
-      
+
+      <div className="w-full flex justify-end mb-1">
+        <button
+          onClick={() => { playButtonSound(); onToggleMute(); }}
+          className="text-2xl p-1 rounded-full hover:bg-white/20 transition-colors"
+          title={isMuted ? 'Unmute' : 'Mute'}
+        >
+          {isMuted ? '🔇' : '🔊'}
+        </button>
+      </div>
+
       <div className="w-full">
         <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseOperation')}</h2>
         <div className="flex justify-center gap-2">
@@ -152,7 +171,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
                 onClick={() => { playButtonSound(); setSelectedDifficulty(d); }}
                 isSelected={selectedDifficulty === d}
               >
-                {difficultyDisplay[d]}
+                <div className="flex flex-col items-center leading-tight">
+                  <span>{difficultyLabel[d]}</span>
+                  <span className="text-xs font-semibold opacity-70">{difficultyAge[d]}</span>
+                </div>
               </SelectionButton>
             ))}
           </div>
