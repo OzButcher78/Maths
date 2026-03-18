@@ -77,8 +77,6 @@ function App() {
     playMultiplierSound,
     playMilestoneSound,
     playTickSound,
-    isMuted,
-    toggleMute,
   } = useSounds();
 
   useEffect(() => {
@@ -483,24 +481,24 @@ function App() {
         return <MultiplicationSetupScreen onStart={handleStartMultiplicationGame} onBack={handleBackToMenuFromSetup} playButtonSound={playButtonPressSound} />;
       case 'menu':
       default:
-        return <MenuScreen onStartGame={handleGameSelection} playButtonSound={playButtonPressSound} leaderboard={leaderboard} isMuted={isMuted} onToggleMute={toggleMute} />;
+        return <MenuScreen onStartGame={handleGameSelection} playButtonSound={playButtonPressSound} leaderboard={leaderboard} />;
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-sky-400 to-blue-600 min-h-screen text-white flex flex-col items-center justify-center sm:p-4">
+    <div className="bg-gradient-to-br from-sky-400 to-blue-600 min-h-screen text-white flex flex-col items-center justify-center sm:p-4 sm:py-6">
       {splashData && <SplashScreen message={splashData.count ? t(splashData.messageKey).replace('{count}', splashData.count.toString()) : t(splashData.messageKey)} />}
       <div className="w-full max-w-lg mx-auto sm:p-8 bg-white/10 backdrop-blur-xl sm:rounded-3xl sm:shadow-2xl sm:border sm:border-white/20 flex flex-col justify-between min-h-screen sm:min-h-0 sm:h-auto">
-        <div className="p-4 flex flex-col flex-grow justify-between">
+        <div className="p-2 sm:p-4 flex flex-col flex-grow justify-between">
             <div>
-                <h1 className="text-4xl sm:text-5xl md:text-5xl font-black text-center mb-4 text-white drop-shadow-lg">
+                <h1 className="text-4xl sm:text-5xl md:text-5xl font-black text-center mb-2 sm:mb-4 text-white drop-shadow-lg">
                 {t('gameTitle')}
                 </h1>
                 <div className="flex-grow flex flex-col justify-center">
                     {renderGameState()}
                 </div>
             </div>
-            <footer className="pt-6 pb-2 text-center">
+            <footer className="pt-3 sm:pt-6 pb-1 sm:pb-2 text-center">
             {gameState === 'playing' && (
                 <button onClick={handleExitGame} className="bg-red-500/80 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors">
                     {t('exitGame')}

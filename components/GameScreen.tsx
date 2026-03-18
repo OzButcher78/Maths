@@ -33,8 +33,6 @@ interface GameScreenProps {
   showPointsPopup?: boolean;
   onPopupComplete?: () => void;
   timerTotal?: number;
-  isMuted?: boolean;
-  onToggleMute?: () => void;
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak, isBonusActive, onAnswerSubmit, answerFeedback, showWrongAnswerOverlay, playButtonSound, gameMode, timer, justLostLife, multiplier, playTickSound, lastPoints = null, showPointsPopup = false, onPopupComplete = () => {}, timerTotal = 60 }) => {
@@ -101,22 +99,22 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
   }, [answerFeedback]);
 
   return (
-    <div className="relative flex flex-col items-center gap-4 text-center animate-fade-in">
+    <div className="relative flex flex-col items-center gap-2 sm:gap-4 text-center animate-fade-in">
       <ConfettiEffect trigger={triggerConfetti} />
       <FloatingScore amount={lastPoints} visible={showPointsPopup} onComplete={onPopupComplete} />
        {showWrongAnswerOverlay && (
-        <div className="absolute inset-0 bg-red-500/95 backdrop-blur-sm rounded-3xl flex flex-col items-center z-20 animate-fade-in p-6">
-            <div className="mt-8 md:mt-12 flex flex-col items-center gap-2">
-                <WizardAvatar state="dizzy" size={130} />
-                <p className="text-white/80 text-xl md:text-2xl font-bold uppercase tracking-widest">
+        <div className="absolute inset-0 bg-red-500/95 backdrop-blur-sm rounded-3xl flex flex-col items-center z-20 animate-fade-in p-4 sm:p-6">
+            <div className="mt-4 sm:mt-8 md:mt-12 flex flex-col items-center gap-1 sm:gap-2">
+                <WizardAvatar state="dizzy" size={100} />
+                <p className="text-white/80 text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-widest">
                     {t('wrongAnswer')}
                 </p>
             </div>
-            <div className="flex-grow flex flex-col items-center justify-center pb-20 space-y-6">
-                <p className="text-white text-5xl md:text-6xl font-bold opacity-90">
+            <div className="flex-grow flex flex-col items-center justify-center pb-8 sm:pb-20 space-y-3 sm:space-y-6">
+                <p className="text-white text-4xl sm:text-5xl md:text-6xl font-bold opacity-90">
                     {question.num1} {question.operator} {question.num2}
                 </p>
-                <p className="text-white text-7xl md:text-9xl font-black drop-shadow-2xl">
+                <p className="text-white text-6xl sm:text-7xl md:text-9xl font-black drop-shadow-2xl">
                     = {question.answer}
                 </p>
             </div>
@@ -167,7 +165,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
         </div>
       )}
 
-      <div className="bg-white/30 p-6 rounded-2xl shadow-lg w-full">
+      <div className="bg-white/30 p-4 sm:p-6 rounded-2xl shadow-lg w-full">
         <p className="text-5xl md:text-7xl font-black tracking-wider text-blue-900 drop-shadow-lg">
           {question.num1} {question.operator} {question.num2}
         </p>
@@ -184,20 +182,27 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
         playButtonSound={playButtonSound}
       />
 
-      <div className="w-full max-w-xs flex justify-center items-center mt-4 h-12 px-2">
-        <StreakIndicator streak={streak} isBonusActive={isBonusActive} />
+      <div className="w-full max-w-xs flex items-center mt-2 sm:mt-4 h-12 px-2">
+        <div className="w-8 sm:hidden" />
+        <div className="flex-1 flex justify-center">
+          <StreakIndicator streak={streak} isBonusActive={isBonusActive} />
+        </div>
+        <div className="w-8 sm:hidden flex items-center justify-center">
+          {answerFeedback === 'correct' && (
+            <div className="animate-fade-in"><TickIcon /></div>
+          )}
+          {answerFeedback === 'incorrect' && !showWrongAnswerOverlay && (
+            <div className="animate-fade-in"><CrossIcon /></div>
+          )}
+        </div>
       </div>
 
-      <div className="h-10 flex items-center justify-center gap-4">
+      <div className="hidden sm:flex h-10 items-center justify-center gap-4">
         {answerFeedback === 'correct' && (
-            <div className="animate-fade-in">
-                <TickIcon />
-            </div>
+            <div className="animate-fade-in"><TickIcon /></div>
         )}
         {answerFeedback === 'incorrect' && !showWrongAnswerOverlay && (
-            <div className="animate-fade-in">
-                <CrossIcon />
-            </div>
+            <div className="animate-fade-in"><CrossIcon /></div>
         )}
       </div>
     </div>

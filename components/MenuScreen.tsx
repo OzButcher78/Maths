@@ -9,8 +9,6 @@ interface MenuScreenProps {
   onStartGame: (operation: Operation, difficulty: Difficulty | null, gameMode: GameMode, duration?: number) => void;
   playButtonSound: () => void;
   leaderboard: ScoreEntry[];
-  isMuted: boolean;
-  onToggleMute: () => void;
 }
 
 const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'ai'];
@@ -31,7 +29,7 @@ const gameModeIcons: Record<GameMode, string> = {
     timeAttack: '⏱️',
 };
 
-const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, leaderboard, isMuted, onToggleMute }) => {
+const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, leaderboard }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
   const [selectedGameMode, setSelectedGameMode] = useState<GameMode | null>(null);
@@ -113,17 +111,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onStartGame, playButtonSound, l
   const isStartDisabled = !selectedOperation || !selectedGameMode || (selectedOperation !== 'multiplication' && !selectedDifficulty);
 
   return (
-    <div className="flex flex-col items-center gap-5 animate-fade-in">
-
-      <div className="w-full flex justify-end mb-1">
-        <button
-          onClick={() => { playButtonSound(); onToggleMute(); }}
-          className="text-2xl p-1 rounded-full hover:bg-white/20 transition-colors"
-          title={isMuted ? 'Unmute' : 'Mute'}
-        >
-          {isMuted ? '🔇' : '🔊'}
-        </button>
-      </div>
+    <div className="flex flex-col items-center gap-3 sm:gap-5 animate-fade-in">
 
       <div className="w-full">
         <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center mb-3">{t('chooseOperation')}</h2>
