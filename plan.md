@@ -97,8 +97,12 @@ Generated from: QA audit, teacher pedagogical review, and child engagement revie
 ✅ **23. Timer bar with colour urgency**
 - Done: Colour-shifting progress bar below stats row (green → yellow → pulsing red).
 
-✅ **24. Mute / settings toggle on menu**
-- Done: 🔊/🔇 button on menu screen. Controlled via `isMuted` state in `useSounds.ts`.
+~~**24. Mute / settings toggle on menu**~~
+- Removed: Mute button was removed — users control volume via device settings.
+
+✅ **24b. Wav sound effects for wizard**
+- Done: Replaced synthesized sounds with wav files (`public/wizard/`): `wrong.wav` (incorrect), `magic.wav` (splash/milestones), `defeat.wav` (game over), `powerup.wav` (future use).
+- All wav files preloaded on `unlockAudio()` for instant playback. Streak milestones play only `magic.wav`.
 
 ### Medium Effort — Significant Engagement Boost
 

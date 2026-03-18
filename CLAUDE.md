@@ -15,7 +15,7 @@
 | All TypeScript types/interfaces | `types.ts` |
 | i18n translations (EN) | `public/locales/en.json` |
 | i18n translations (DE) | `public/locales/de.json` |
-| Sound effects (Web Audio API) | `hooks/useSounds.ts` |
+| Sound effects (Web Audio API + wav) | `hooks/useSounds.ts` |
 | Gemini name validation | `services/geminiService.ts` |
 | Entry point (React mount) | `index.tsx` |
 | HTML shell + Tailwind CDN | `index.html` |
@@ -74,7 +74,6 @@ GameState type is in `types.ts`. Transitions are handled in `App.tsx`.
 | `weakQuestions` | `Question[]` | Spaced repetition pool (max 10); wrong answers added here, 30% re-serve chance |
 | `lastPoints` | `number \| null` | Last points scored; feeds FloatingScore popup |
 | `showPointsPopup` | `boolean` | Triggers the FloatingScore component |
-| `isMuted` | `boolean` | From useSounds hook; wired to MenuScreen mute button |
 
 ---
 
@@ -116,7 +115,8 @@ AI difficulty no longer uses raw `questionCount` to select a number range. Inste
 2. **New game constant** → add to `constants.ts`
 3. **New type** → add to `types.ts`
 4. **New component** → add to `components/`, consume via `App.tsx`
-5. **New sound** → extend `hooks/useSounds.ts`
+5. **New sound** → add wav file to `public/wizard/`, register in `hooks/useSounds.ts` (add to preload list in `unlockAudio` and create a `playWav` call)
+6. **Always** → after every change, modification, update, or new feature, add an entry to `CHANGELOG.md` with the date and a short description of what changed.
 
 ---
 
@@ -131,10 +131,12 @@ AI difficulty no longer uses raw `questionCount` to select a number range. Inste
 
 ## Known Patterns
 
-**Mute:**
-- Controlled via `isMuted` state inside `useSounds.ts`.
-- Toggled via `toggleMute` function returned from the hook.
-- Passed as props `App → MenuScreen` → mute button. Does NOT suspend or close the AudioContext — it only short-circuits `playSound` at the top of the function.
+**Sound effects:**
+- Mix of synthesized tones (Web Audio API oscillators) and wav files in `public/wizard/`.
+- Wav files: `wrong.wav` (incorrect answer), `magic.wav` (splash/milestones), `defeat.wav` (game over), `powerup.wav` (available for future use).
+- All wav files are preloaded into an `AudioBuffer` cache on `unlockAudio()` for instant playback.
+- `isMuted` / `toggleMute` exist in useSounds but are not currently exposed in the UI (mute button was removed — users control volume via device).
+- On streak milestones, only the splash screen sound (magic.wav) plays — no separate streak sound.
 
 **Spaced repetition:**
 - `weakQuestions` lives in App state → passed as a parameter to `generateQuestion` → 30% chance of re-serving a wrong question from the pool.
@@ -167,6 +169,6 @@ npm run preview   # preview production build
 - **Leaderboard in localStorage** — top 20 scores only, no backend. Key: `mathWhizLeaderboard`.
 - **Gemini name check is async** — `GameOverScreen.tsx` has loading state during validation.
 - **Keypad debounce** — 100ms lock in `Keypad.tsx` to prevent rapid multi-submit.
-- **Audio** — Web Audio API, synthesized tones only (no audio files). AudioContext created on first user interaction via `unlockAudio()`. If never called, all sounds silently no-op.
+- **Audio** — Web Audio API for synthesized tones + preloaded wav files (`public/wizard/*.wav`). AudioContext created on first user interaction via `unlockAudio()`. If never called, all sounds silently no-op. No mute button in UI — users control volume via device.
 - **No React Router** — do not add a router; use the existing GameState enum pattern.
 - **Wrong-answer display** — held for 3 seconds (was 2s) to give children time to process the mistake.
