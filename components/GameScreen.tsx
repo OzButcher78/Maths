@@ -103,18 +103,18 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
       <ConfettiEffect trigger={triggerConfetti} />
       <FloatingScore amount={lastPoints} visible={showPointsPopup} onComplete={onPopupComplete} />
        {showWrongAnswerOverlay && (
-        <div className="absolute inset-0 bg-red-500/95 backdrop-blur-sm rounded-3xl flex flex-col items-center z-20 animate-fade-in p-4 sm:p-6">
-            <div className="mt-4 sm:mt-8 md:mt-12 flex flex-col items-center gap-1 sm:gap-2">
-                <WizardAvatar state="dizzy" size={100} />
+        <div className="fixed inset-2 rounded-2xl sm:absolute sm:inset-0 bg-red-500/95 backdrop-blur-sm sm:rounded-3xl flex flex-col items-center justify-center z-20 animate-fade-in p-4 sm:p-6">
+            <div className="flex flex-col items-center gap-1 sm:gap-2">
+                <WizardAvatar state="dizzy" size={80} />
                 <p className="text-white/80 text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-widest">
                     {t('wrongAnswer')}
                 </p>
             </div>
-            <div className="flex-grow flex flex-col items-center justify-center pb-8 sm:pb-20 space-y-3 sm:space-y-6">
-                <p className="text-white text-4xl sm:text-5xl md:text-6xl font-bold opacity-90">
+            <div className="flex flex-col items-center justify-center mt-4 sm:mt-8 space-y-2 sm:space-y-6">
+                <p className="text-white text-3xl sm:text-5xl md:text-6xl font-bold opacity-90">
                     {question.num1} {question.operator} {question.num2}
                 </p>
-                <p className="text-white text-6xl sm:text-7xl md:text-9xl font-black drop-shadow-2xl">
+                <p className="text-white text-5xl sm:text-7xl md:text-9xl font-black drop-shadow-2xl">
                     = {question.answer}
                 </p>
             </div>

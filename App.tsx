@@ -255,24 +255,18 @@ function App() {
 
     if (isCorrect) {
       setAnswerFeedback('correct');
-      playCorrectSound();
 
       const newStreak = streak + 1;
       let bonusPoints = 0;
       const streakBonus = STREAK_BONUSES.find(b => b.streak === newStreak);
       const maxStreak = STREAK_BONUSES.length > 0 ? Math.max(...STREAK_BONUSES.map(b => b.streak)) : 0;
-      
+
       if (streakBonus) {
-          if (newStreak === 3) playStreak3Sound();
-          else if (newStreak === 6) playStreak6Sound();
-          else if (newStreak === 10) playStreak10Sound();
-          else if (newStreak === 15) playStreak15Sound();
-          else if (newStreak === 20) playStreak20Sound();
-          else playStreak3Sound();
-          
           bonusPoints = streakBonus.bonus;
           setIsBonusActive(true);
           setTimeout(() => setIsBonusActive(false), 1000);
+      } else {
+          playCorrectSound();
       }
 
       let pointsToAdd = 0;

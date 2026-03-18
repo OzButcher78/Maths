@@ -23,12 +23,21 @@ const NOTE_FREQ = {
 
 const useSounds = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
+  const wavBufferCache = useRef<Record<string, AudioBuffer | null>>({});
   const [isMuted, setIsMuted] = useState(false);
+
+  const preloadWav = useCallback((path: string, context: AudioContext) => {
+    fetch(path)
+      .then(res => res.arrayBuffer())
+      .then(buf => context.decodeAudioData(buf))
+      .then(decoded => { wavBufferCache.current[path] = decoded; })
+      .catch(() => {});
+  }, []);
 
   // This function MUST be called after a user interaction to allow audio playback in browsers.
   const unlockAudio = useCallback(() => {
     if (audioContextRef.current) return;
-    
+
     try {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       const context = new AudioContext();
@@ -38,10 +47,45 @@ const useSounds = () => {
       }
       audioContextRef.current = context;
       console.log("AudioContext initialized successfully.");
+
+      // Preload wav files so they play instantly on first use
+      ['/wizard/wrong.wav', '/wizard/magic.wav', '/wizard/defeat.wav', '/wizard/powerup.wav'].forEach(p => preloadWav(p, context));
     } catch (e) {
       console.error("Web Audio API is not supported in this browser.", e);
     }
-  }, []);
+  }, [preloadWav]);
+
+  const playWav = useCallback((path: string, volume: number = 0.5) => {
+    if (isMuted) return;
+    const audioContext = audioContextRef.current;
+    if (!audioContext) return;
+    if (audioContext.state === 'suspended') audioContext.resume();
+
+    const cached = wavBufferCache.current[path];
+    if (cached) {
+      const source = audioContext.createBufferSource();
+      const gain = audioContext.createGain();
+      gain.gain.value = volume;
+      source.buffer = cached;
+      source.connect(gain).connect(audioContext.destination);
+      source.start();
+      return;
+    }
+
+    fetch(path)
+      .then(res => res.arrayBuffer())
+      .then(buf => audioContext.decodeAudioData(buf))
+      .then(decoded => {
+        wavBufferCache.current[path] = decoded;
+        const source = audioContext.createBufferSource();
+        const gain = audioContext.createGain();
+        gain.gain.value = volume;
+        source.buffer = decoded;
+        source.connect(gain).connect(audioContext.destination);
+        source.start();
+      })
+      .catch(() => {});
+  }, [isMuted]);
 
   const playSound = useCallback((notes: { freq: number, start: number, duration: number, type?: OscillatorType, vol?: number }[]) => {
     if (isMuted) return;
@@ -86,70 +130,36 @@ const useSounds = () => {
     ]);
   }, [playSound]);
 
-  // A low, harsh buzz for an incorrect answer
+  // Wrong answer sound effect
   const playIncorrectSound = useCallback(() => {
-    playSound([
-      { freq: 164.81, start: 0, duration: 0.2, type: 'sawtooth', vol: 0.2 },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/wrong.wav', 0.4);
+  }, [playWav]);
 
-  // Streak 3: Simple uplifting triad
+  // Streak power-up sound (shared across all streak milestones)
   const playStreak3Sound = useCallback(() => {
-    playSound([
-      { freq: NOTE_FREQ.C5, start: 0, duration: 0.1, type: 'triangle' },
-      { freq: NOTE_FREQ.E5, start: 0.1, duration: 0.1, type: 'triangle' },
-      { freq: NOTE_FREQ.G5, start: 0.2, duration: 0.2, type: 'triangle' },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/powerup.wav', 0.35);
+  }, [playWav]);
 
-  // Streak 6: Higher, faster
   const playStreak6Sound = useCallback(() => {
-    playSound([
-      { freq: NOTE_FREQ.E5, start: 0, duration: 0.08, type: 'triangle' },
-      { freq: NOTE_FREQ.G5, start: 0.08, duration: 0.08, type: 'triangle' },
-      { freq: NOTE_FREQ.C6, start: 0.16, duration: 0.2, type: 'triangle' },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/powerup.wav', 0.4);
+  }, [playWav]);
 
-  // Streak 10: Longer ascending run
   const playStreak10Sound = useCallback(() => {
-    playSound([
-      { freq: NOTE_FREQ.C5, start: 0, duration: 0.08, type: 'triangle', vol: 0.2 },
-      { freq: NOTE_FREQ.E5, start: 0.08, duration: 0.08, type: 'triangle', vol: 0.2 },
-      { freq: NOTE_FREQ.G5, start: 0.16, duration: 0.08, type: 'triangle', vol: 0.25 },
-      { freq: NOTE_FREQ.C6, start: 0.24, duration: 0.3, type: 'triangle', vol: 0.3 },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/powerup.wav', 0.45);
+  }, [playWav]);
 
-  // Streak 15: Fanfare-like
   const playStreak15Sound = useCallback(() => {
-    playSound([
-      { freq: NOTE_FREQ.G5, start: 0, duration: 0.1, type: 'triangle' },
-      { freq: NOTE_FREQ.C6, start: 0.1, duration: 0.1, type: 'triangle' },
-      { freq: NOTE_FREQ.E6, start: 0.2, duration: 0.1, type: 'triangle' },
-      { freq: NOTE_FREQ.G6, start: 0.3, duration: 0.4, type: 'triangle', vol: 0.4 },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/powerup.wav', 0.5);
+  }, [playWav]);
 
-  // Streak 20: Epic chord sweep
   const playStreak20Sound = useCallback(() => {
-    playSound([
-      { freq: NOTE_FREQ.C4, start: 0, duration: 0.5, type: 'sine', vol: 0.3 },
-      { freq: NOTE_FREQ.C5, start: 0, duration: 0.5, type: 'sine', vol: 0.3 },
-      { freq: NOTE_FREQ.E5, start: 0.05, duration: 0.45, type: 'sine', vol: 0.3 },
-      { freq: NOTE_FREQ.G5, start: 0.1, duration: 0.4, type: 'sine', vol: 0.3 },
-      { freq: NOTE_FREQ.C6, start: 0.15, duration: 0.6, type: 'triangle', vol: 0.4 },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/powerup.wav', 0.55);
+  }, [playWav]);
 
-  // A slower, descending arpeggio for game over
+  // Game over defeat sound
   const playGameOverSound = useCallback(() => {
-    playSound([
-      { freq: NOTE_FREQ.G4, start: 0, duration: 0.15, type: 'square', vol: 0.2 },
-      { freq: NOTE_FREQ.E4, start: 0.15, duration: 0.15, type: 'square', vol: 0.2 },
-      { freq: NOTE_FREQ.C4, start: 0.3, duration: 0.3, type: 'square', vol: 0.2 },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/defeat.wav', 0.5);
+  }, [playWav]);
 
   // A short, sharp click for button presses
   const playButtonPressSound = useCallback(() => {
@@ -158,15 +168,10 @@ const useSounds = () => {
     ]);
   }, [playSound]);
 
-  // A bright, celebratory fanfare for splash screens
+  // Magic spell sound for splash screens / milestones
   const playSplashScreenSound = useCallback(() => {
-    playSound([
-        { freq: NOTE_FREQ.C5, start: 0, duration: 0.1, vol: 0.3 },
-        { freq: NOTE_FREQ.E5, start: 0.1, duration: 0.1, vol: 0.3 },
-        { freq: NOTE_FREQ.G5, start: 0.2, duration: 0.1, vol: 0.3 },
-        { freq: NOTE_FREQ.C6, start: 0.3, duration: 0.2, vol: 0.4 },
-    ]);
-  }, [playSound]);
+    playWav('/wizard/magic.wav', 0.45);
+  }, [playWav]);
 
   // A quick rising sound for multiplier increase
   const playMultiplierSound = useCallback(() => {
