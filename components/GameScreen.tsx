@@ -47,6 +47,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ question, score, lives, streak,
 
   const handleSubmit = () => {
     if (answer === '') return;
+    if (answerFeedback !== null) return;
     const userAnswer = parseInt(answer, 10);
     if (!isNaN(userAnswer)) {
       onAnswerSubmit(userAnswer);

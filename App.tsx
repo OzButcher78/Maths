@@ -208,7 +208,8 @@ function App() {
 
   const handleAnswer = (userAnswer: number) => {
     if (!question || !operation || !gameMode) return;
-    
+    if (answerFeedback !== null) return;
+
     const isCorrect = userAnswer === question.answer;
 
     setPerformanceStats(prevStats => {

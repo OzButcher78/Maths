@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-23
+
+### Fix: prevent multi-tap score exploit
+- After a correct answer, kids could spam-tap ✓ during the 1500ms feedback delay and earn extra points each tap.
+- `GameScreen.handleSubmit` and `App.handleAnswer` now both reject submissions while `answerFeedback !== null` — points only count once per question.
+
 ## 2026-03-18
 
 ### Wav sound effects for wizard
