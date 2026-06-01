@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-01
+
+### Add x15 and x25 times tables
+- Extended the multiplication table picker (`MultiplicationSetupScreen`) with the 15 and 25 tables, which kids are now learning in school.
+- No question-generation changes needed — `generateQuestion` already multiplies any selected table by 1–12.
+
 ## 2026-05-23
 
 ### Fix: prevent multi-tap score exploit
