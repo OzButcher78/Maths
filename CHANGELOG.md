@@ -9,7 +9,9 @@
 
 ### About page: v2.4 release notes
 - Bumped app version to **2.4** in the About page (`version` key, EN + DE).
-- Added a "Neu in v2.4 — Danke, Noah B.!" changelog section (`changelog24*` keys in both locales) listing the point-system fix and the new times tables.
+- Added a "Neu in v2.4 — Danke, Noah" changelog section (`changelog24*` keys in both locales) listing the point-system fix and the new times tables.
+- Moved the copyright line (`© 2026 Dieter Balmer`) from under the version to a footer at the bottom of the About page.
+- Removed the standalone "Version 2.4" line (and the now-unused `version` locale key) — the version is conveyed by the changelog heading.
 
 ## 2026-05-23
 

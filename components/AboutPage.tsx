@@ -17,10 +17,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack }) => {
       <div className="w-full bg-black/20 p-6 rounded-xl space-y-4 text-center">
         <p className="text-lg text-white/90">{t('aboutAppDescription')}</p>
         <div className="pt-4 text-sm text-white/70 flex flex-col gap-1">
-            <p className="font-bold">{t('version')}</p>
-            <p>{t('copyright')}</p>
-
-            <div className="mt-4 pt-4 border-t border-white/10">
+            <div className="pt-2 border-t border-white/10">
                 <p className="font-bold mb-2 text-white/90">{t('changelog24Title')}</p>
                 <ul className="text-xs space-y-1.5 text-white/80 list-none">
                     <li>• {t('changelog24_1')}</li>
@@ -55,6 +52,10 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack }) => {
         <BackIcon />
         {t('backToMenu')}
       </button>
+
+      <footer className="mt-2 text-xs text-white/50 text-center">
+        {t('copyright')}
+      </footer>
     </div>
   );
 };
