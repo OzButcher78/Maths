@@ -2,9 +2,14 @@
 
 ## 2026-06-01
 
-### Add x15 and x25 times tables
-- Extended the multiplication table picker (`MultiplicationSetupScreen`) with the 15 and 25 tables, which kids are now learning in school.
+### Add x15, x25, x50 and x75 times tables
+- Extended the multiplication table picker (`MultiplicationSetupScreen`) with the 15 and 25 tables, which kids are now learning in school, plus 50 and 75 for fun.
+- The 16 options now fill the 4-column grid evenly (4 full rows).
 - No question-generation changes needed — `generateQuestion` already multiplies any selected table by 1–12.
+
+### About page: v2.4 release notes
+- Bumped app version to **2.4** in the About page (`version` key, EN + DE).
+- Added a "Neu in v2.4 — Danke, Noah B.!" changelog section (`changelog24*` keys in both locales) listing the point-system fix and the new times tables.
 
 ## 2026-05-23
 

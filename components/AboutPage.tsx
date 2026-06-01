@@ -19,8 +19,15 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack }) => {
         <div className="pt-4 text-sm text-white/70 flex flex-col gap-1">
             <p className="font-bold">{t('version')}</p>
             <p>{t('copyright')}</p>
-            
+
             <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="font-bold mb-2 text-white/90">{t('changelog24Title')}</p>
+                <ul className="text-xs space-y-1.5 text-white/80 list-none">
+                    <li>• {t('changelog24_1')}</li>
+                    <li>• {t('changelog24_2')}</li>
+                </ul>
+            </div>
+            <div className="mt-3 pt-3 border-t border-white/10">
                 <p className="font-bold mb-2 text-white/90">{t('changelogTitle')}</p>
                 <ul className="text-xs space-y-1.5 text-white/80 list-none">
                     <li>• {t('changelog1')}</li>
